@@ -324,11 +324,14 @@
         </div>
       </div>
       <div class="filters-right">
-        <span id="statusIndicator" class="status-indicator">
-          <span class="status-dot loading"></span> Läser in...
-        </span>
-      </div>
-    </div>
+  <button id="syncButton" class="btn btn-sm btn-ghost">
+    Läs in metadata
+  </button>
+  <span id="statusIndicator" class="status-indicator">
+    <span class="status-dot loading"></span> Läser in...
+  </span>
+</div>
+
 
     <div class="table-container" id="tableContainer">
       <table>
@@ -366,6 +369,8 @@
     const decisionFilterEl = document.getElementById("decisionFilter");
     const tableBody = document.getElementById("tableBody");
     const statusIndicator = document.getElementById("statusIndicator");
+    const syncButton = document.getElementById("syncButton");
+
 
     function setStatus(text, mode) {
       statusIndicator.innerHTML = "";
@@ -604,6 +609,43 @@
       }
     }
 
+    syncButton.addEventListener("click", async () => {
+  const ok = window.confirm(
+    "VARNING: Är du säker på att du vill läsa in metadata?\n\n" +
+    "Inläsningen kan ta upp till 20 minuter."
+  );
+  if (!ok) return;
+
+  syncButton.disabled = true;
+  setStatus("Läser in metadata...", "loading");
+
+  try {
+    const res = await fetch(API_BASE + "/sync-metadata", {
+      method: "POST",
+      headers: { accept: "application/json" },
+    });
+
+    if (!res.ok) {
+      throw new Error("HTTP " + res.status);
+    }
+
+    const data = await res.json();
+    console.log("Sync result", data);
+
+    // När sync är klar – ladda om tabellen
+    await fetchTable();
+    setStatus(`Metadata inläst – ${data.processed ?? "?"} rader`, "ok");
+  } catch (err) {
+    console.error(err);
+    setStatus("Fel vid inläsning av metadata", "error");
+    alert("Kunde inte läsa in metadata. Kontrollera loggarna och försök igen.");
+  } finally {
+    syncButton.disabled = false;
+  }
+});
+
+    
+    
     matchFilterEl.addEventListener("change", applyFilters);
     decisionFilterEl.addEventListener("change", applyFilters);
 
