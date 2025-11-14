@@ -316,9 +316,11 @@
           <select id="decisionFilter">
             <option value="ALL">Alla</option>
             <option value="NONE">Tomt</option>
+            <option value="Match">Match</option>
             <option value="Godkänd">Godkänd</option>
             <option value="Nekad">Nekad</option>
           </select>
+
         </div>
       </div>
       <div class="filters-right">
@@ -408,25 +410,37 @@
     }
 
     function applyFilters() {
-      const matchF = matchFilterEl.value;
-      const decisionF = decisionFilterEl.value;
+  const matchF = matchFilterEl.value;
+  const decisionF = decisionFilterEl.value;
 
-      filteredRows = allRows.filter((row) => {
-        // Match-filter
-        if (matchF !== "ALL" && row.match !== matchF) {
-          return false;
-        }
-
-        // Decision-filter
-        const dec = row.decision || null;
-        if (decisionF === "NONE" && dec !== null) return false;
-        if ((decisionF === "Godkänd" || decisionF === "Nekad") && dec !== decisionF) return false;
-
-        return true;
-      });
-
-      renderTable();
+  filteredRows = allRows.filter((row) => {
+    // Match-filter
+    if (matchF !== "ALL" && row.match !== matchF) {
+      return false;
     }
+
+    // Decision-filter
+    const dec = row.decision || null;
+
+    if (decisionF === "NONE" && dec !== null) return false;
+
+    if (decisionF === "Match") {
+      // Godkänn-kolumn visar "Match" när:
+      //  - row.match === "OK"
+      //  - row.decision == null
+      if (!(row.match === "OK" && dec === null)) return false;
+    }
+
+    if ((decisionF === "Godkänd" || decisionF === "Nekad") && dec !== decisionF) {
+      return false;
+    }
+
+    return true;
+  });
+
+  renderTable();
+}
+
 
     function renderTable() {
       if (!filteredRows.length) {
