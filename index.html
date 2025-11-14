@@ -103,6 +103,31 @@
       box-shadow: 0 0 0 1px rgba(0, 82, 204, 0.15);
     }
 
+    .decision-filter-group {
+      display: inline-flex;
+      flex-direction: column;
+      gap: 0.1rem;
+      font-size: 0.78rem;
+    }
+
+    .decision-filter-group .filter-label {
+      font-size: 0.8rem;
+      color: var(--muted);
+      margin-bottom: 0.1rem;
+    }
+
+    .chk {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.25rem;
+      margin-right: 0.4rem;
+      cursor: pointer;
+    }
+
+    .chk input[type="checkbox"] {
+      accent-color: var(--accent);
+    }
+
     .table-container {
       border-radius: 0.75rem;
       border: 1px solid rgba(0, 0, 0, 0.06);
@@ -189,7 +214,12 @@
       cursor: pointer;
       background: #f3f4f6;
       color: #111827;
-      transition: background var(--transition), transform var(--transition), box-shadow var(--transition), border-color var(--transition), color var(--transition);
+      transition:
+        background var(--transition),
+        transform var(--transition),
+        box-shadow var(--transition),
+        border-color var(--transition),
+        color var(--transition);
       white-space: nowrap;
     }
 
@@ -281,32 +311,6 @@
       color: var(--muted);
     }
 
-    .decision-filter-group {
-  display: inline-flex;
-  flex-direction: column;
-  gap: 0.1rem;
-  font-size: 0.78rem;
-}
-
-.decision-filter-group .filter-label {
-  font-size: 0.8rem;
-  color: var(--muted);
-  margin-bottom: 0.1rem;
-}
-
-.chk {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.25rem;
-  margin-right: 0.4rem;
-  cursor: pointer;
-}
-
-.chk input[type="checkbox"] {
-  accent-color: var(--accent);
-}
-
-
     @media (max-width: 768px) {
       .page {
         padding-inline: 0.75rem;
@@ -339,43 +343,41 @@
         </div>
 
         <div class="decision-filter-group">
-  <span class="filter-label">Godkänn-filter</span><br />
-  <label class="chk">
-    <input type="checkbox" name="decisionFilter" value="NONE" checked />
-    Tom
-  </label>
-  <label class="chk">
-    <input type="checkbox" name="decisionFilter" value="Match" checked />
-    Match
-  </label>
-  <label class="chk">
-    <input type="checkbox" name="decisionFilter" value="Godkänd" checked />
-    Godkänd
-  </label>
-  <label class="chk">
-    <input type="checkbox" name="decisionFilter" value="Nekad" checked />
-    Nekad
-  </label>
-</div>
-        
+          <span class="filter-label">Godkänn-filter</span><br />
+          <label class="chk">
+            <input type="checkbox" name="decisionFilter" value="NONE" checked />
+            Tom
+          </label>
+          <label class="chk">
+            <input type="checkbox" name="decisionFilter" value="Match" checked />
+            Match
+          </label>
+          <label class="chk">
+            <input type="checkbox" name="decisionFilter" value="Godkänd" checked />
+            Godkänd
+          </label>
+          <label class="chk">
+            <input type="checkbox" name="decisionFilter" value="Nekad" checked />
+            Nekad
+          </label>
+        </div>
       </div>
-      
-     <div class="filters-right">
-  <button id="syncButton" class="btn btn-sm btn-ghost">
-    Läs in metadata
-  </button>
-  <button id="exportCsvButton" class="btn btn-sm">
-    Exportera CSV
-  </button>
-  <button id="exportJsonButton" class="btn btn-sm btn-ghost">
-    Exportera JSON
-  </button>
-  <span id="statusIndicator" class="status-indicator">
-    <span class="status-dot loading"></span> Läser in...
-  </span>
-</div>
 
-
+      <div class="filters-right">
+        <button id="syncButton" class="btn btn-sm btn-ghost">
+          Läs in metadata
+        </button>
+        <button id="exportCsvButton" class="btn btn-sm">
+          Exportera CSV
+        </button>
+        <button id="exportJsonButton" class="btn btn-sm btn-ghost">
+          Exportera JSON
+        </button>
+        <span id="statusIndicator" class="status-indicator">
+          <span class="status-dot loading"></span> Läser in...
+        </span>
+      </div>
+    </div>
 
     <div class="table-container" id="tableContainer">
       <table>
@@ -402,13 +404,8 @@
 </div>
 
 <script>
-  
-  const exportCsvButton = document.getElementById("exportCsvButton");
-  const exportJsonButton = document.getElementById("exportJsonButton");
-
-  
   (function () {
-    const API_BASE = "/api"; // Pages Function kommer routa vidare till workern
+    const API_BASE = "/api";
 
     let allRows = [];
     let filteredRows = [];
@@ -416,12 +413,13 @@
 
     const matchFilterEl = document.getElementById("matchFilter");
     const decisionFilterBoxes = Array.from(
-  document.querySelectorAll('input[name="decisionFilter"]')
-);
+      document.querySelectorAll('input[name="decisionFilter"]')
+    );
     const tableBody = document.getElementById("tableBody");
     const statusIndicator = document.getElementById("statusIndicator");
     const syncButton = document.getElementById("syncButton");
-
+    const exportCsvButton = document.getElementById("exportCsvButton");
+    const exportJsonButton = document.getElementById("exportJsonButton");
 
     function setStatus(text, mode) {
       statusIndicator.innerHTML = "";
@@ -442,7 +440,7 @@
         const res = await fetch(API_BASE + "/table", {
           method: "GET",
           headers: {
-            "accept": "application/json",
+            accept: "application/json",
           },
         });
         if (!res.ok) {
@@ -455,10 +453,8 @@
         setStatus(`Klar – ${allRows.length} rader`, "ok");
       } catch (err) {
         console.error(err);
-        tableBody.innerHTML = `
-          <tr><td colspan="6" class="empty-state">
-            Kunde inte läsa data från servern. Försök igen eller kontrollera loggarna.
-          </td></tr>`;
+        tableBody.innerHTML =
+          '<tr><td colspan="6" class="empty-state">Kunde inte läsa data från servern. Försök igen eller kontrollera loggarna.</td></tr>';
         setStatus("Fel vid hämtning", "error");
       } finally {
         isLoading = false;
@@ -466,49 +462,44 @@
     }
 
     function applyFilters() {
-  const matchF = matchFilterEl.value;
+      const matchF = matchFilterEl.value;
 
-  const selectedDecisions = decisionFilterBoxes
-    .filter((cb) => cb.checked)
-    .map((cb) => cb.value);
+      const selectedDecisions = decisionFilterBoxes
+        .filter((cb) => cb.checked)
+        .map((cb) => cb.value);
 
-  filteredRows = allRows.filter((row) => {
-    // Match-filter (OK/KOLLA/Alla)
-    if (matchF !== "ALL" && row.match !== matchF) {
-      return false;
+      filteredRows = allRows.filter((row) => {
+        // Match-filter
+        if (matchF !== "ALL" && row.match !== matchF) {
+          return false;
+        }
+
+        // Godkänn-filter: NONE / Match / Godkänd / Nekad
+        const dec = row.decision || null;
+        let bucket;
+
+        if (dec === "Godkänd" || dec === "Nekad") {
+          bucket = dec;
+        } else if (row.match === "OK") {
+          bucket = "Match";
+        } else {
+          bucket = "NONE";
+        }
+
+        if (selectedDecisions.length === 0) {
+          return false;
+        }
+
+        return selectedDecisions.includes(bucket);
+      });
+
+      renderTable();
     }
-
-    // Godkänn-filter: NONE / Match / Godkänd / Nekad
-    const dec = row.decision || null;
-    let bucket;
-
-    if (dec === "Godkänd" || dec === "Nekad") {
-      bucket = dec; // "Godkänd" eller "Nekad"
-    } else if (row.match === "OK") {
-      bucket = "Match"; // match OK, men inget beslut sparat
-    } else {
-      bucket = "NONE";  // vare sig Match eller beslut (GODKÄNN/NEKA-läge)
-    }
-
-    // Om inga checkboxar är ikryssade → visa inget
-    if (selectedDecisions.length === 0) {
-      return false;
-    }
-
-    return selectedDecisions.includes(bucket);
-  });
-
-  renderTable();
-}
-
-
 
     function renderTable() {
       if (!filteredRows.length) {
-        tableBody.innerHTML = `
-          <tr><td colspan="6" class="empty-state">
-            Inga rader matchar nuvarande filter.
-          </td></tr>`;
+        tableBody.innerHTML =
+          '<tr><td colspan="6" class="empty-state">Inga rader matchar nuvarande filter.</td></tr>';
         return;
       }
 
@@ -538,7 +529,8 @@
 
         const tdMatch = document.createElement("td");
         const badge = document.createElement("span");
-        badge.className = "badge " + (row.match === "OK" ? "badge-ok" : "badge-kolla");
+        badge.className =
+          "badge " + (row.match === "OK" ? "badge-ok" : "badge-kolla");
         badge.textContent = row.match === "OK" ? "OK" : "KOLLA";
         tdMatch.appendChild(badge);
         tr.appendChild(tdMatch);
@@ -555,7 +547,6 @@
       const container = document.createElement("div");
       container.className = "cell-actions";
 
-      // Om beslut redan är sparat
       if (row.decision === "Godkänd") {
         const pill = document.createElement("span");
         pill.className = "pill";
@@ -572,9 +563,7 @@
         return container;
       }
 
-      // Ingen beslut än:
       if (row.match === "OK") {
-        // "Match" som text
         const pill = document.createElement("span");
         pill.className = "pill";
         pill.textContent = "Match";
@@ -582,7 +571,6 @@
         return container;
       }
 
-      // match === "KOLLA" → GODKÄNN/NEKA-knappar
       const approveBtn = document.createElement("button");
       approveBtn.type = "button";
       approveBtn.className = "btn btn-sm btn-primary";
@@ -593,8 +581,12 @@
       rejectBtn.className = "btn btn-sm btn-danger";
       rejectBtn.textContent = "NEKA";
 
-      approveBtn.addEventListener("click", () => enterSaveState(container, row, "Godkänd"));
-      rejectBtn.addEventListener("click", () => enterSaveState(container, row, "Nekad"));
+      approveBtn.addEventListener("click", () =>
+        enterSaveState(container, row, "Godkänd")
+      );
+      rejectBtn.addEventListener("click", () =>
+        enterSaveState(container, row, "Nekad")
+      );
 
       container.appendChild(approveBtn);
       container.appendChild(rejectBtn);
@@ -622,7 +614,6 @@
       });
 
       cancelBtn.addEventListener("click", () => {
-        // Återställ actions-cell utifrån nuvarande row-status
         container.replaceWith(buildActionCell(row));
       });
 
@@ -630,86 +621,13 @@
       container.appendChild(cancelBtn);
     }
 
-    function downloadFile(filename, mime, content) {
-  const blob = new Blob([content], { type: mime });
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement("a");
-  a.href = url;
-  a.download = filename;
-  document.body.appendChild(a);
-  a.click();
-  a.remove();
-  URL.revokeObjectURL(url);
-}
-
-function exportFilteredAsCsv() {
-  if (!filteredRows.length) {
-    alert("Det finns inga rader i den filtrerade listan att exportera.");
-    return;
-  }
-
-  const headers = [
-    "orgnr",
-    "bvName",
-    "entityOrgName",
-    "entityOrgDispName",
-    "match",
-    "decision",
-    "decidedAt",
-  ];
-
-  const sep = ";"; // Excel-vänligt i svensk miljö
-
-  const escape = (value) => {
-    if (value === null || value === undefined) return "";
-    const s = String(value).replace(/"/g, '""');
-    return `"${s}"`;
-  };
-
-  const lines = [];
-  lines.push(headers.map(escape).join(sep));
-
-  for (const row of filteredRows) {
-    const line = [
-      row.orgnr ?? "",
-      row.bvName ?? "",
-      row.entityOrgName ?? "",
-      row.entityOrgDispName ?? "",
-      row.match ?? "",
-      row.decision ?? "",
-      row.decidedAt ?? "",
-    ].map(escape).join(sep);
-    lines.push(line);
-  }
-
-  const csvContent = "\uFEFF" + lines.join("\r\n"); // BOM + CRLF = Excelvänligt
-  const ts = new Date().toISOString().replace(/[:T]/g, "-").slice(0, 16);
-  const filename = `metadata-export-${ts}.csv`;
-
-  downloadFile(filename, "text/csv;charset=utf-8;", csvContent);
-}
-
-function exportFilteredAsJson() {
-  if (!filteredRows.length) {
-    alert("Det finns inga rader i den filtrerade listan att exportera.");
-    return;
-  }
-
-  const json = JSON.stringify(filteredRows, null, 2);
-  const ts = new Date().toISOString().replace(/[:T]/g, "-").slice(0, 16);
-  const filename = `metadata-export-${ts}.json`;
-
-  downloadFile(filename, "application/json;charset=utf-8;", json);
-}
-
-
     async function saveDecision(row, decision) {
       try {
         const res = await fetch(API_BASE + "/decision", {
           method: "POST",
           headers: {
             "content-type": "application/json",
-            "accept": "application/json",
+            accept: "application/json",
           },
           body: JSON.stringify({ orgnr: row.orgnr, decision }),
         });
@@ -720,16 +638,14 @@ function exportFilteredAsJson() {
 
         const updated = await res.json();
 
-        // Uppdatera i allRows
         const idx = allRows.findIndex((r) => r.orgnr === updated.orgnr);
         if (idx !== -1) {
           allRows[idx] = updated;
         }
 
-        // Uppdatera radobjektet vi har i minnet
         Object.assign(row, updated);
 
-        applyFilters(); // bygg om filteredRows och rendera tabell
+        applyFilters();
         setStatus("Beslut sparat", "ok");
       } catch (err) {
         console.error(err);
@@ -738,56 +654,127 @@ function exportFilteredAsJson() {
       }
     }
 
-    syncButton.addEventListener("click", async () => {
-  const ok = window.confirm(
-    "VARNING: Är du säker på att du vill läsa in metadata?\n\n" +
-    "Inläsningen kan ta upp till 20 minuter."
-  );
-  if (!ok) return;
-
-  syncButton.disabled = true;
-  setStatus("Läser in metadata...", "loading");
-
-  try {
-    const res = await fetch(API_BASE + "/sync-metadata", {
-      method: "POST",
-      headers: { accept: "application/json" },
-    });
-
-    if (!res.ok) {
-      throw new Error("HTTP " + res.status);
+    function downloadFile(filename, mime, content) {
+      const blob = new Blob([content], { type: mime });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = filename;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      URL.revokeObjectURL(url);
     }
 
-    const data = await res.json();
-    console.log("Sync result", data);
+    function exportFilteredAsCsv() {
+      if (!filteredRows.length) {
+        alert("Det finns inga rader i den filtrerade listan att exportera.");
+        return;
+      }
 
-    // När sync är klar – ladda om tabellen
-    await fetchTable();
-    setStatus(`Metadata inläst – ${data.processed ?? "?"} rader`, "ok");
-  } catch (err) {
-    console.error(err);
-    setStatus("Fel vid inläsning av metadata", "error");
-    alert("Kunde inte läsa in metadata. Kontrollera loggarna och försök igen.");
-  } finally {
-    syncButton.disabled = false;
-  }
-});
+      const headers = [
+        "orgnr",
+        "bvName",
+        "entityOrgName",
+        "entityOrgDispName",
+        "match",
+        "decision",
+        "decidedAt",
+      ];
 
-    
-    
+      const sep = ";";
+
+      const escape = (value) => {
+        if (value === null || value === undefined) return "";
+        const s = String(value).replace(/"/g, '""');
+        return `"${s}"`;
+      };
+
+      const lines = [];
+      lines.push(headers.map(escape).join(sep));
+
+      for (const row of filteredRows) {
+        const line = [
+          row.orgnr ?? "",
+          row.bvName ?? "",
+          row.entityOrgName ?? "",
+          row.entityOrgDispName ?? "",
+          row.match ?? "",
+          row.decision ?? "",
+          row.decidedAt ?? "",
+        ]
+          .map(escape)
+          .join(sep);
+        lines.push(line);
+      }
+
+      const csvContent = "\uFEFF" + lines.join("\r\n");
+      const ts = new Date().toISOString().replace(/[:T]/g, "-").slice(0, 16);
+      const filename = `metadata-export-${ts}.csv`;
+
+      downloadFile(filename, "text/csv;charset=utf-8;", csvContent);
+    }
+
+    function exportFilteredAsJson() {
+      if (!filteredRows.length) {
+        alert("Det finns inga rader i den filtrerade listan att exportera.");
+        return;
+      }
+
+      const json = JSON.stringify(filteredRows, null, 2);
+      const ts = new Date().toISOString().replace(/[:T]/g, "-").slice(0, 16);
+      const filename = `metadata-export-${ts}.json`;
+
+      downloadFile(filename, "application/json;charset=utf-8;", json);
+    }
+
+    syncButton.addEventListener("click", async () => {
+      const ok = window.confirm(
+        "VARNING: Är du säker på att du vill läsa in metadata?\n\n" +
+          "Inläsningen kan ta upp till 20 minuter."
+      );
+      if (!ok) return;
+
+      syncButton.disabled = true;
+      setStatus("Läser in metadata...", "loading");
+
+      try {
+        const res = await fetch(API_BASE + "/sync-metadata", {
+          method: "POST",
+          headers: { accept: "application/json" },
+        });
+
+        if (!res.ok) {
+          throw new Error("HTTP " + res.status);
+        }
+
+        const data = await res.json();
+        console.log("Sync result", data);
+
+        await fetchTable();
+        setStatus(
+          `Metadata inläst – ${data.processed ?? "?"} rader`,
+          "ok"
+        );
+      } catch (err) {
+        console.error(err);
+        setStatus("Fel vid inläsning av metadata", "error");
+        alert("Kunde inte läsa in metadata. Kontrollera loggarna och försök igen.");
+      } finally {
+        syncButton.disabled = false;
+      }
+    });
+
     matchFilterEl.addEventListener("change", applyFilters);
-decisionFilterBoxes.forEach((cb) =>
-  cb.addEventListener("change", applyFilters)
-);
+    decisionFilterBoxes.forEach((cb) =>
+      cb.addEventListener("change", applyFilters)
+    );
+    exportCsvButton.addEventListener("click", exportFilteredAsCsv);
+    exportJsonButton.addEventListener("click", exportFilteredAsJson);
 
-
-    // Kickoff
     fetchTable();
   })();
-
-  exportCsvButton.addEventListener("click", exportFilteredAsCsv);
-  exportJsonButton.addEventListener("click", exportFilteredAsJson);
-
 </script>
 </body>
 </html>
+
