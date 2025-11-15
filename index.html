@@ -675,6 +675,7 @@
       }
 
       const headers = [
+        "entityId",
         "orgnr",
         "bvName",
         "entityOrgName",
@@ -682,7 +683,8 @@
         "match",
         "decision",
         "decidedAt",
-      ];
+];
+
 
       const sep = ";";
 
@@ -697,6 +699,7 @@
 
       for (const row of filteredRows) {
         const line = [
+          row.entityId ?? "",
           row.orgnr ?? "",
           row.bvName ?? "",
           row.entityOrgName ?? "",
@@ -704,9 +707,9 @@
           row.match ?? "",
           row.decision ?? "",
           row.decidedAt ?? "",
-        ]
-          .map(escape)
-          .join(sep);
+]
+  .map(escape)
+  .join(sep);
         lines.push(line);
       }
 
