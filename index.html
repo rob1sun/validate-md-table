@@ -729,41 +729,66 @@
     }
 
     syncButton.addEventListener("click", async () => {
-      const ok = window.confirm(
-        "VARNING: Är du säker på att du vill läsa in metadata?\n\n" +
-          "Inläsningen kan ta upp till 20 minuter."
+  const ok = window.confirm(
+    "VARNING: Är du säker på att du vill läsa in metadata?\n\n" +
+      "Inläsningen kan ta upp till 20 minuter."
+  );
+  if (!ok) return;
+
+  syncButton.disabled = true;
+
+  try {
+    let cursor = null;
+    let totalProcessed = 0;
+    let batch = 0;
+
+    while (true) {
+      batch++;
+      const url =
+        API_BASE +
+        "/sync-metadata" +
+        (cursor ? "?cursor=" + encodeURIComponent(cursor) : "");
+
+      setStatus(
+        `Läser in metadata... (batch ${batch}, totalt ${totalProcessed} rader)`,
+        "loading"
       );
-      if (!ok) return;
 
-      syncButton.disabled = true;
-      setStatus("Läser in metadata...", "loading");
+      const res = await fetch(url, {
+        method: "POST",
+        headers: { accept: "application/json" },
+      });
 
-      try {
-        const res = await fetch(API_BASE + "/sync-metadata", {
-          method: "POST",
-          headers: { accept: "application/json" },
-        });
-
-        if (!res.ok) {
-          throw new Error("HTTP " + res.status);
-        }
-
-        const data = await res.json();
-        console.log("Sync result", data);
-
-        await fetchTable();
-        setStatus(
-          `Metadata inläst – ${data.processed ?? "?"} rader`,
-          "ok"
-        );
-      } catch (err) {
-        console.error(err);
-        setStatus("Fel vid inläsning av metadata", "error");
-        alert("Kunde inte läsa in metadata. Kontrollera loggarna och försök igen.");
-      } finally {
-        syncButton.disabled = false;
+      if (!res.ok) {
+        throw new Error("HTTP " + res.status);
       }
-    });
+
+      const data = await res.json();
+      console.log("Sync result", data);
+
+      totalProcessed += data.processed || 0;
+
+      if (data.done || !data.cursor) {
+        break;
+      }
+
+      cursor = data.cursor;
+    }
+
+    await fetchTable();
+    setStatus(
+      `Metadata inläst – ${totalProcessed} rader`,
+      "ok"
+    );
+  } catch (err) {
+    console.error(err);
+    setStatus("Fel vid inläsning av metadata", "error");
+    alert("Kunde inte läsa in metadata. Kontrollera loggarna och försök igen.");
+  } finally {
+    syncButton.disabled = false;
+  }
+});
+
 
     matchFilterEl.addEventListener("change", applyFilters);
     decisionFilterBoxes.forEach((cb) =>
