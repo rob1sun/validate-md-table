@@ -1,20 +1,20 @@
 // functions/api/[path].js
 export async function onRequest(context) {
   const { request, env, params } = context;
-
-  // Bygg om URL så att /api/table → /table på workern, etc.
   const url = new URL(request.url);
+
+  // Frontend:  /api/table,          /api/sync-metadata, /api/decision
+  // Worker:    /table,              /sync-metadata,     /decision
   const backendPath = "/" + (params.path || "");
-  const backendUrl = new URL(backendPath, "https://dummy"); // basen används inte av workern
+  const backendUrl = new URL(backendPath + url.search, "https://dummy");
 
   const init = {
     method: request.method,
     headers: request.headers,
-    body: ["GET", "HEAD"].includes(request.method) ? null : request.body,
+    body: ["GET", "HEAD"].includes(request.method) ? undefined : request.body,
   };
 
   const backendRequest = new Request(backendUrl.toString(), init);
 
-  // VALIDATE_MD_WORKER är din service binding
   return env.VALIDATE_MD_WORKER.fetch(backendRequest);
 }
