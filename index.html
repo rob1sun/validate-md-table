@@ -104,17 +104,19 @@
     }
 
     .decision-filter-group {
-      display: inline-flex;
-      flex-direction: column;
-      gap: 0.1rem;
-      font-size: 0.78rem;
-    }
+  display: inline-flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.4rem;
+  font-size: 0.78rem;
+}
 
-    .decision-filter-group .filter-label {
-      font-size: 0.8rem;
-      color: var(--muted);
-      margin-bottom: 0.1rem;
-    }
+.decision-filter-group .filter-label {
+  font-size: 0.8rem;
+  color: var(--muted);
+  margin-right: 0.25rem;
+}
+
 
     .chk {
       display: inline-flex;
@@ -343,25 +345,25 @@
         </div>
 
         <div class="decision-filter-group">
-          <span class="filter-label">Godkänn-filter</span><br />
-          <label class="chk">
-            <input type="checkbox" name="decisionFilter" value="NONE" checked />
-            Tom
-          </label>
-          <label class="chk">
-            <input type="checkbox" name="decisionFilter" value="Match" checked />
-            Match
-          </label>
-          <label class="chk">
-            <input type="checkbox" name="decisionFilter" value="Godkänd" checked />
-            Godkänd
-          </label>
-          <label class="chk">
-            <input type="checkbox" name="decisionFilter" value="Nekad" checked />
-            Nekad
-          </label>
-        </div>
-      </div>
+  <span class="filter-label">Godkänn-filter</span>
+  <label class="chk">
+    <input type="checkbox" name="decisionFilter" value="NONE" checked />
+    Tom
+  </label>
+  <label class="chk">
+    <input type="checkbox" name="decisionFilter" value="Match" checked />
+    Match
+  </label>
+  <label class="chk">
+    <input type="checkbox" name="decisionFilter" value="Godkänd" checked />
+    Godkänd
+  </label>
+  <label class="chk">
+    <input type="checkbox" name="decisionFilter" value="Nekad" checked />
+    Nekad
+  </label>
+</div>
+
 
       <div class="filters-right">
         <button id="syncButton" class="btn btn-sm btn-ghost">
