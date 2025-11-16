@@ -693,61 +693,60 @@
     }
 
     function buildActionCell(row) {
-  const container = document.createElement("div");
-  container.className = "cell-actions";
+      const container = document.createElement("div");
+      container.className = "cell-actions";
 
-  if (row.decision === "Godkänd" || row.decision === "Nekad") {
-    const pill = document.createElement("span");
-    pill.className = "pill";
-    pill.textContent = row.decision; // "Godkänd" eller "Nekad"
-    container.appendChild(pill);
+      if (row.decision === "Godkänd" || row.decision === "Nekad") {
+        const pill = document.createElement("span");
+        pill.className = "pill";
+        pill.textContent = row.decision; // "Godkänd" eller "Nekad"
+        container.appendChild(pill);
 
-    const changeBtn = document.createElement("button");
-    changeBtn.type = "button";
-    changeBtn.className = "btn btn-sm btn-ghost";
-    changeBtn.textContent = "Ändra";
-    changeBtn.addEventListener("click", (ev) => {
-      ev.stopPropagation(); // förhindra att rad-klick öppnar modalen
-      resetDecision(row);
-    });
+        const changeBtn = document.createElement("button");
+        changeBtn.type = "button";
+        changeBtn.className = "btn btn-sm btn-ghost";
+        changeBtn.textContent = "Ändra";
+        changeBtn.addEventListener("click", (ev) => {
+          ev.stopPropagation();
+          resetDecision(row);
+        });
 
-    container.appendChild(changeBtn);
-    return container;
-  }
+        container.appendChild(changeBtn);
+        return container;
+      }
 
-  if (row.match === "OK") {
-    const pill = document.createElement("span");
-    pill.className = "pill";
-    pill.textContent = "Match";
-    container.appendChild(pill);
-    return container;
-  }
+      if (row.match === "OK") {
+        const pill = document.createElement("span");
+        pill.className = "pill";
+        pill.textContent = "Match";
+        container.appendChild(pill);
+        return container;
+      }
 
-  const approveBtn = document.createElement("button");
-  approveBtn.type = "button";
-  approveBtn.className = "btn btn-sm btn-primary";
-  approveBtn.textContent = "GODKÄNN";
+      const approveBtn = document.createElement("button");
+      approveBtn.type = "button";
+      approveBtn.className = "btn btn-sm btn-primary";
+      approveBtn.textContent = "GODKÄNN";
 
-  const rejectBtn = document.createElement("button");
-  rejectBtn.type = "button";
-  rejectBtn.className = "btn btn-sm btn-danger";
-  rejectBtn.textContent = "NEKA";
+      const rejectBtn = document.createElement("button");
+      rejectBtn.type = "button";
+      rejectBtn.className = "btn btn-sm btn-danger";
+      rejectBtn.textContent = "NEKA";
 
-  approveBtn.addEventListener("click", (ev) => {
-    ev.stopPropagation();
-    enterSaveState(container, row, "Godkänd");
-  });
-  rejectBtn.addEventListener("click", (ev) => {
-    ev.stopPropagation();
-    enterSaveState(container, row, "Nekad");
-  });
+      approveBtn.addEventListener("click", (ev) => {
+        ev.stopPropagation();
+        enterSaveState(container, row, "Godkänd");
+      });
+      rejectBtn.addEventListener("click", (ev) => {
+        ev.stopPropagation();
+        enterSaveState(container, row, "Nekad");
+      });
 
-  container.appendChild(approveBtn);
-  container.appendChild(rejectBtn);
+      container.appendChild(approveBtn);
+      container.appendChild(rejectBtn);
 
-  return container;
-}
-
+      return container;
+    }
 
     function enterSaveState(container, row, pendingDecision) {
       container.innerHTML = "";
@@ -814,40 +813,38 @@
     }
 
     async function resetDecision(row) {
-  try {
-    const res = await fetch(API_BASE + "/decision/reset", {
-      method: "POST",
-      headers: {
-        "content-type": "application/json",
-        accept: "application/json",
-      },
-      body: JSON.stringify({ orgnr: row.orgnr }),
-    });
+      try {
+        const res = await fetch(API_BASE + "/decision", {
+          method: "POST",
+          headers: {
+            "content-type": "application/json",
+            accept: "application/json",
+          },
+          body: JSON.stringify({ orgnr: row.orgnr, decision: "RESET" }),
+        });
 
-    if (!res.ok) {
-      throw new Error("HTTP " + res.status);
+        if (!res.ok) {
+          throw new Error("HTTP " + res.status);
+        }
+
+        const updated = await res.json();
+
+        const idx = allRows.findIndex((r) => r.orgnr === updated.orgnr);
+        if (idx !== -1) {
+          updated._id = allRows[idx]._id;
+          allRows[idx] = updated;
+        }
+
+        Object.assign(row, updated);
+
+        applyFilters();
+        setStatus("Beslut återställt", "ok");
+      } catch (err) {
+        console.error(err);
+        setStatus("Kunde inte återställa beslut", "error");
+        alert("Kunde inte återställa beslutet. Kontrollera loggarna och försök igen.");
+      }
     }
-
-    const updated = await res.json();
-
-    const idx = allRows.findIndex((r) => r.orgnr === updated.orgnr);
-    if (idx !== -1) {
-      // behåll löpnummer
-      updated._id = allRows[idx]._id;
-      allRows[idx] = updated;
-    }
-
-    Object.assign(row, updated);
-
-    applyFilters();
-    setStatus("Beslut återställt", "ok");
-  } catch (err) {
-    console.error(err);
-    setStatus("Kunde inte återställa beslut", "error");
-    alert("Kunde inte återställa beslutet. Kontrollera loggarna och försök igen.");
-  }
-}
-
 
     function downloadFile(filename, mime, content) {
       const blob = new Blob([content], { type: mime });
@@ -988,7 +985,7 @@
             (cursor ? "?cursor=" + encodeURIComponent(cursor) : "");
 
           setStatus(
-            `Läser in metadata... (batch ${batch}, totalt ${totalProcessed} rader)`,
+            `Läser in metadata... (batch ${batch}, totalt ${totalProcessed} uppdateringar)`,
             "loading"
           );
 
