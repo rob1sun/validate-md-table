@@ -104,25 +104,24 @@
     }
 
     .decision-filter-group {
-  display: inline-flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: 0.4rem;
-  font-size: 0.78rem;
-}
+      display: inline-flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 0.4rem;
+      font-size: 0.78rem;
+    }
 
-.decision-filter-group .filter-label {
-  font-size: 0.8rem;
-  color: var(--muted);
-  margin-right: 0.25rem;
-}
-
+    .decision-filter-group .filter-label {
+      font-size: 0.8rem;
+      color: var(--muted);
+      margin-right: 0.25rem;
+    }
 
     .chk {
       display: inline-flex;
       align-items: center;
       gap: 0.25rem;
-      margin-right: 0.4rem;
+      margin-right: 0.2rem;
       cursor: pointer;
     }
 
@@ -142,7 +141,7 @@
       width: 100%;
       border-collapse: collapse;
       font-size: 0.8rem;
-      min-width: 900px;
+      min-width: 950px;
     }
 
     thead {
@@ -307,10 +306,99 @@
       background: #ef4444;
     }
 
+    .row-count {
+      font-size: 0.75rem;
+      color: var(--muted);
+      white-space: nowrap;
+    }
+
     .empty-state {
       padding: 0.8rem;
       font-size: 0.8rem;
       color: var(--muted);
+    }
+
+    /* Modal */
+
+    .modal {
+      position: fixed;
+      inset: 0;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 50;
+    }
+
+    .modal.show {
+      display: flex;
+    }
+
+    .modal-backdrop {
+      position: absolute;
+      inset: 0;
+      background: rgba(15, 23, 42, 0.45);
+    }
+
+    .modal-dialog {
+      position: relative;
+      background: #fff;
+      border-radius: 0.9rem;
+      padding: 1rem 1.2rem 1rem;
+      max-width: 520px;
+      width: 100%;
+      box-shadow: 0 18px 45px rgba(15, 23, 42, 0.3);
+      z-index: 1;
+      max-height: 80vh;
+      overflow: auto;
+    }
+
+    .modal-title {
+      font-size: 0.95rem;
+      font-weight: 600;
+      margin-bottom: 0.4rem;
+    }
+
+    .modal-close {
+      position: absolute;
+      top: 0.4rem;
+      right: 0.5rem;
+      border: none;
+      background: transparent;
+      font-size: 1.1rem;
+      cursor: pointer;
+      color: #9ca3af;
+    }
+
+    .modal-close:hover {
+      color: #4b5563;
+    }
+
+    .modal-body {
+      font-size: 0.8rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.25rem;
+      margin-top: 0.25rem;
+    }
+
+    .modal-row {
+      display: grid;
+      grid-template-columns: 130px 1fr;
+      gap: 0.4rem;
+      padding: 0.15rem 0;
+      border-bottom: 1px solid #f3f4f6;
+    }
+
+    .modal-row-label {
+      font-weight: 600;
+      color: #4b5563;
+    }
+
+    .modal-row-value {
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas,
+        "Liberation Mono", "Courier New", monospace;
+      white-space: pre-wrap;
+      word-break: break-word;
     }
 
     @media (max-width: 768px) {
@@ -319,6 +407,12 @@
       }
       h1 {
         font-size: 1.2rem;
+      }
+      .modal-dialog {
+        max-width: 95vw;
+      }
+      .modal-row {
+        grid-template-columns: 110px 1fr;
       }
     }
   </style>
@@ -345,27 +439,28 @@
         </div>
 
         <div class="decision-filter-group">
-  <span class="filter-label">Godkänn-filter</span>
-  <label class="chk">
-    <input type="checkbox" name="decisionFilter" value="NONE" checked />
-    Tom
-  </label>
-  <label class="chk">
-    <input type="checkbox" name="decisionFilter" value="Match" checked />
-    Match
-  </label>
-  <label class="chk">
-    <input type="checkbox" name="decisionFilter" value="Godkänd" checked />
-    Godkänd
-  </label>
-  <label class="chk">
-    <input type="checkbox" name="decisionFilter" value="Nekad" checked />
-    Nekad
-  </label>
-</div>
-
+          <span class="filter-label">Godkänn-filter</span>
+          <label class="chk">
+            <input type="checkbox" name="decisionFilter" value="NONE" checked />
+            Tom
+          </label>
+          <label class="chk">
+            <input type="checkbox" name="decisionFilter" value="Match" checked />
+            Match
+          </label>
+          <label class="chk">
+            <input type="checkbox" name="decisionFilter" value="Godkänd" checked />
+            Godkänd
+          </label>
+          <label class="chk">
+            <input type="checkbox" name="decisionFilter" value="Nekad" checked />
+            Nekad
+          </label>
+        </div>
+      </div>
 
       <div class="filters-right">
+        <span id="rowCount" class="row-count"></span>
         <button id="syncButton" class="btn btn-sm btn-ghost">
           Läs in metadata
         </button>
@@ -385,6 +480,7 @@
       <table>
         <thead>
         <tr>
+          <th>ID</th>
           <th>Orgnr</th>
           <th>BV: Namn</th>
           <th>Entity: OrgName</th>
@@ -395,7 +491,7 @@
         </thead>
         <tbody id="tableBody">
         <tr>
-          <td colspan="6" class="empty-state">
+          <td colspan="7" class="empty-state">
             Hämtar data från servern...
           </td>
         </tr>
@@ -403,6 +499,16 @@
       </table>
     </div>
   </section>
+</div>
+
+<!-- Modal -->
+<div id="detailModal" class="modal">
+  <div id="modalBackdrop" class="modal-backdrop"></div>
+  <div class="modal-dialog">
+    <button id="modalClose" class="modal-close" type="button">&times;</button>
+    <div class="modal-title">Detaljer</div>
+    <div id="modalContent" class="modal-body"></div>
+  </div>
 </div>
 
 <script>
@@ -422,6 +528,12 @@
     const syncButton = document.getElementById("syncButton");
     const exportCsvButton = document.getElementById("exportCsvButton");
     const exportJsonButton = document.getElementById("exportJsonButton");
+    const rowCountEl = document.getElementById("rowCount");
+
+    const detailModal = document.getElementById("detailModal");
+    const modalBackdrop = document.getElementById("modalBackdrop");
+    const modalCloseBtn = document.getElementById("modalClose");
+    const modalContent = document.getElementById("modalContent");
 
     function setStatus(text, mode) {
       statusIndicator.innerHTML = "";
@@ -433,6 +545,11 @@
       const span = document.createElement("span");
       span.textContent = " " + text;
       statusIndicator.appendChild(span);
+    }
+
+    function updateRowCount() {
+      if (!rowCountEl) return;
+      rowCountEl.textContent = filteredRows.length + " poster";
     }
 
     async function fetchTable() {
@@ -449,14 +566,33 @@
           throw new Error("HTTP " + res.status);
         }
         const data = await res.json();
-        allRows = Array.isArray(data.rows) ? data.rows : [];
+
+        // Ta bara riktiga organisationer, filtrera bort __meta__-keys
+        allRows = (Array.isArray(data.rows) ? data.rows : [])
+          .filter(
+            (row) =>
+              row &&
+              row.orgnr &&
+              !String(row.orgnr).startsWith("__meta__")
+          )
+          .sort((a, b) =>
+            String(a.orgnr || "").localeCompare(String(b.orgnr || ""))
+          );
+
+        // Tilldela stabilt löpnummer (ID) baserat på sorterad ordning
+        allRows.forEach((row, idx) => {
+          row._id = idx + 1;
+        });
+
         filteredRows = allRows.slice();
         applyFilters();
-        setStatus(`Klar – ${allRows.length} rader`, "ok");
+        setStatus(`Klar – ${allRows.length} rader totalt`, "ok");
       } catch (err) {
         console.error(err);
         tableBody.innerHTML =
-          '<tr><td colspan="6" class="empty-state">Kunde inte läsa data från servern. Försök igen eller kontrollera loggarna.</td></tr>';
+          '<tr><td colspan="7" class="empty-state">Kunde inte läsa data från servern. Försök igen eller kontrollera loggarna.</td></tr>';
+        filteredRows = [];
+        updateRowCount();
         setStatus("Fel vid hämtning", "error");
       } finally {
         isLoading = false;
@@ -496,12 +632,13 @@
       });
 
       renderTable();
+      updateRowCount();
     }
 
     function renderTable() {
       if (!filteredRows.length) {
         tableBody.innerHTML =
-          '<tr><td colspan="6" class="empty-state">Inga rader matchar nuvarande filter.</td></tr>';
+          '<tr><td colspan="7" class="empty-state">Inga rader matchar nuvarande filter.</td></tr>';
         return;
       }
 
@@ -509,6 +646,10 @@
 
       for (const row of filteredRows) {
         const tr = document.createElement("tr");
+
+        const tdId = document.createElement("td");
+        tdId.textContent = row._id ?? "";
+        tr.appendChild(tdId);
 
         const tdOrgnr = document.createElement("td");
         tdOrgnr.textContent = row.orgnr ?? "";
@@ -540,6 +681,12 @@
         const tdActions = document.createElement("td");
         tdActions.appendChild(buildActionCell(row));
         tr.appendChild(tdActions);
+
+        // Klick på rad öppnar modal (men inte om man klickar på knappar)
+        tr.addEventListener("click", (e) => {
+          if (e.target.closest("button")) return;
+          openModal(row);
+        });
 
         tableBody.appendChild(tr);
       }
@@ -583,12 +730,14 @@
       rejectBtn.className = "btn btn-sm btn-danger";
       rejectBtn.textContent = "NEKA";
 
-      approveBtn.addEventListener("click", () =>
-        enterSaveState(container, row, "Godkänd")
-      );
-      rejectBtn.addEventListener("click", () =>
-        enterSaveState(container, row, "Nekad")
-      );
+      approveBtn.addEventListener("click", (ev) => {
+        ev.stopPropagation();
+        enterSaveState(container, row, "Godkänd");
+      });
+      rejectBtn.addEventListener("click", (ev) => {
+        ev.stopPropagation();
+        enterSaveState(container, row, "Nekad");
+      });
 
       container.appendChild(approveBtn);
       container.appendChild(rejectBtn);
@@ -609,13 +758,15 @@
       cancelBtn.className = "btn btn-sm btn-ghost";
       cancelBtn.textContent = "ÅNGRA";
 
-      saveBtn.addEventListener("click", async () => {
+      saveBtn.addEventListener("click", async (ev) => {
+        ev.stopPropagation();
         saveBtn.disabled = true;
         cancelBtn.disabled = true;
         await saveDecision(row, pendingDecision);
       });
 
-      cancelBtn.addEventListener("click", () => {
+      cancelBtn.addEventListener("click", (ev) => {
+        ev.stopPropagation();
         container.replaceWith(buildActionCell(row));
       });
 
@@ -642,6 +793,8 @@
 
         const idx = allRows.findIndex((r) => r.orgnr === updated.orgnr);
         if (idx !== -1) {
+          // behåll löpnummer
+          updated._id = allRows[idx]._id;
           allRows[idx] = updated;
         }
 
@@ -675,16 +828,16 @@
       }
 
       const headers = [
-        "entityId",
+        "id",
         "orgnr",
+        "entityId",
         "bvName",
         "entityOrgName",
         "entityOrgDispName",
         "match",
         "decision",
         "decidedAt",
-];
-
+      ];
 
       const sep = ";";
 
@@ -699,17 +852,18 @@
 
       for (const row of filteredRows) {
         const line = [
-          row.entityId ?? "",
+          row._id ?? "",
           row.orgnr ?? "",
+          row.entityId ?? "",
           row.bvName ?? "",
           row.entityOrgName ?? "",
           row.entityOrgDispName ?? "",
           row.match ?? "",
           row.decision ?? "",
           row.decidedAt ?? "",
-]
-  .map(escape)
-  .join(sep);
+        ]
+          .map(escape)
+          .join(sep);
         lines.push(line);
       }
 
@@ -733,67 +887,105 @@
       downloadFile(filename, "application/json;charset=utf-8;", json);
     }
 
-    syncButton.addEventListener("click", async () => {
-  const ok = window.confirm(
-    "OBS! Du behöver inte läsa in data om någon redan har gjort en fullständig körning.\n\n" +
-      "Inläsningen kan ta några minuter."
-  );
-  if (!ok) return;
+    function openModal(row) {
+      if (!row) return;
+      const lines = [
+        ["ID", row._id ?? ""],
+        ["Orgnr", row.orgnr ?? ""],
+        ["EntityID", row.entityId ?? ""],
+        ["BV: Namn", row.bvName ?? ""],
+        ["Entity: OrgName", row.entityOrgName ?? ""],
+        ["Entity: OrgDispName", row.entityOrgDispName ?? ""],
+        ["Match", row.match ?? ""],
+        ["Decision", row.decision ?? ""],
+        ["DecidedAt", row.decidedAt ?? ""],
+      ];
 
-  syncButton.disabled = true;
+      modalContent.innerHTML = "";
+      for (const [label, value] of lines) {
+        const rowEl = document.createElement("div");
+        rowEl.className = "modal-row";
 
-  try {
-    let cursor = null;
-    let totalProcessed = 0;
-    let batch = 0;
+        const labelEl = document.createElement("div");
+        labelEl.className = "modal-row-label";
+        labelEl.textContent = label;
 
-    while (true) {
-      batch++;
-      const url =
-        API_BASE +
-        "/sync-metadata" +
-        (cursor ? "?cursor=" + encodeURIComponent(cursor) : "");
+        const valueEl = document.createElement("div");
+        valueEl.className = "modal-row-value";
+        valueEl.textContent = value;
 
-      setStatus(
-        `Läser in metadata... (batch ${batch}, totalt ${totalProcessed} rader)`,
-        "loading"
-      );
-
-      const res = await fetch(url, {
-        method: "POST",
-        headers: { accept: "application/json" },
-      });
-
-      if (!res.ok) {
-        throw new Error("HTTP " + res.status);
+        rowEl.appendChild(labelEl);
+        rowEl.appendChild(valueEl);
+        modalContent.appendChild(rowEl);
       }
 
-      const data = await res.json();
-      console.log("Sync result", data);
-
-      totalProcessed += data.processed || 0;
-
-      if (data.done || !data.cursor) {
-        break;
-      }
-
-      cursor = data.cursor;
+      detailModal.classList.add("show");
     }
 
-    await fetchTable();
-    setStatus(
-      `Metadata inläst – ${totalProcessed} rader`,
-      "ok"
-    );
-  } catch (err) {
-    console.error(err);
-    setStatus("Fel vid inläsning av metadata", "error");
-    alert("Kunde inte läsa in metadata. Kontrollera loggarna och försök igen.");
-  } finally {
-    syncButton.disabled = false;
-  }
-});
+    function closeModal() {
+      detailModal.classList.remove("show");
+    }
 
+    syncButton.addEventListener("click", async () => {
+      const ok = window.confirm(
+        "VARNING: Är du säker på att du vill läsa in metadata?\n\n" +
+          "Inläsningen kan ta upp till 20 minuter."
+      );
+      if (!ok) return;
+
+      syncButton.disabled = true;
+
+      try {
+        let cursor = null;
+        let totalProcessed = 0;
+        let batch = 0;
+
+        while (true) {
+          batch++;
+          const url =
+            API_BASE +
+            "/sync-metadata" +
+            (cursor ? "?cursor=" + encodeURIComponent(cursor) : "");
+
+          setStatus(
+            `Läser in metadata... (batch ${batch}, totalt ${totalProcessed} rader)`,
+            "loading"
+          );
+
+          const res = await fetch(url, {
+            method: "POST",
+            headers: { accept: "application/json" },
+          });
+
+          if (!res.ok) {
+            throw new Error("HTTP " + res.status);
+          }
+
+          const data = await res.json();
+          console.log("Sync result", data);
+
+          totalProcessed += data.processed || 0;
+
+          if (data.done || !data.cursor) {
+            break;
+          }
+
+          cursor = data.cursor;
+        }
+
+        await fetchTable();
+        setStatus(
+          `Metadata inläst – ${totalProcessed} uppdateringar`,
+          "ok"
+        );
+      } catch (err) {
+        console.error(err);
+        setStatus("Fel vid inläsning av metadata", "error");
+        alert("Kunde inte läsa in metadata. Kontrollera loggarna och försök igen.");
+      } finally {
+        syncButton.disabled = false;
+      }
+    });
 
     matchFilterEl.addEventListener("change", applyFilters);
     decisionFilterBoxes.forEach((cb) =>
@@ -802,9 +994,14 @@
     exportCsvButton.addEventListener("click", exportFilteredAsCsv);
     exportJsonButton.addEventListener("click", exportFilteredAsJson);
 
+    modalCloseBtn.addEventListener("click", closeModal);
+    modalBackdrop.addEventListener("click", closeModal);
+    document.addEventListener("keydown", (e) => {
+      if (e.key === "Escape") closeModal();
+    });
+
     fetchTable();
   })();
 </script>
 </body>
 </html>
-
