@@ -352,10 +352,55 @@
       overflow: auto;
     }
 
+    .modal-header-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 0.5rem;
+      margin-bottom: 0.35rem;
+    }
+
     .modal-title {
       font-size: 0.95rem;
       font-weight: 600;
-      margin-bottom: 0.4rem;
+    }
+
+    .modal-status-badge {
+      font-size: 0.7rem;
+    }
+
+    .modal-badge {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      padding: 0.1rem 0.6rem;
+      border-radius: 999px;
+      font-size: 0.7rem;
+      font-weight: 600;
+    }
+
+    .modal-badge-auto {
+      background: var(--ok-soft);
+      color: var(--ok);
+      border: 1px solid rgba(28, 148, 74, 0.2);
+    }
+
+    .modal-badge-manual-ok {
+      background: #e0ecff;
+      color: #1d4ed8;
+      border: 1px solid rgba(59, 130, 246, 0.3);
+    }
+
+    .modal-badge-manual-nekad {
+      background: var(--warn-soft);
+      color: var(--warn);
+      border: 1px solid rgba(220, 38, 38, 0.3);
+    }
+
+    .modal-badge-kolla {
+      background: var(--warn-soft);
+      color: var(--warn);
+      border: 1px solid rgba(220, 38, 38, 0.3);
     }
 
     .modal-close {
@@ -506,7 +551,10 @@
   <div id="modalBackdrop" class="modal-backdrop"></div>
   <div class="modal-dialog">
     <button id="modalClose" class="modal-close" type="button">&times;</button>
-    <div class="modal-title">Detaljer</div>
+    <div class="modal-header-row">
+      <div class="modal-title">Detaljer</div>
+      <div id="modalStatusBadge" class="modal-status-badge"></div>
+    </div>
     <div id="modalContent" class="modal-body"></div>
   </div>
 </div>
@@ -944,6 +992,31 @@
 
     function openModal(row) {
       if (!row) return;
+
+      const badgeHost = document.getElementById("modalStatusBadge");
+      if (badgeHost) {
+        badgeHost.innerHTML = "";
+
+        const badge = document.createElement("span");
+        badge.classList.add("modal-badge");
+
+        if (row.decision === "Godkänd") {
+          badge.classList.add("modal-badge-manual-ok");
+          badge.textContent = "Manuellt beslut: Godkänd";
+        } else if (row.decision === "Nekad") {
+          badge.classList.add("modal-badge-manual-nekad");
+          badge.textContent = "Manuellt beslut: Nekad";
+        } else if (row.match === "OK") {
+          badge.classList.add("modal-badge-auto");
+          badge.textContent = "Automatisk match (OK)";
+        } else {
+          badge.classList.add("modal-badge-kolla");
+          badge.textContent = "Avvikelse – ingen automatisk match";
+        }
+
+        badgeHost.appendChild(badge);
+      }
+
       const lines = [
         ["ID", row._id ?? ""],
         ["Orgnr", row.orgnr ?? ""],
