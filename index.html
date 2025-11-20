@@ -2,23 +2,24 @@
 <html lang="sv">
 <head>
   <meta charset="utf-8" />
-  <title>BV / Metadata – Matchning</title>
+  <title>BV / Metadata – validering</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <style>
     :root {
       --bg: #f5f5f7;
       --card-bg: #ffffff;
-      --border: #d0d0d7;
-      --text: #222;
-      --muted: #666;
-      --accent: #0052cc;
-      --ok: #1e8e3e;
-      --ok-soft: #e1f3e5;
-      --warn: #c5221f;
-      --warn-soft: #fde8e6;
-      --btn-radius: 999px;
-      --badge-radius: 999px;
-      --transition: 150ms ease-in-out;
+      --border: #e5e7eb;
+      --border-strong: #94a3b8;
+      --text: #111827;
+      --muted: #6b7280;
+      --accent: #2563eb;
+      --accent-soft: #eff6ff;
+      --ok: #15803d;
+      --ok-bg: #dcfce7;
+      --warn: #b91c1c;
+      --warn-bg: #fee2e2;
+      --chip-bg: #f3f4f6;
+      --chip-border: #d1d5db;
     }
 
     * {
@@ -27,7 +28,8 @@
 
     body {
       margin: 0;
-      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
+        sans-serif;
       background: radial-gradient(circle at top, #eef2ff 0, #f5f5f7 45%, #f5f5f7 100%);
       color: var(--text);
     }
@@ -38,54 +40,160 @@
       padding: 1.5rem 1rem 2rem;
     }
 
-    header {
+    .page-header {
       display: flex;
       flex-direction: column;
-      gap: 0.4rem;
-      margin-bottom: 1rem;
+      gap: 0.5rem;
+      margin-bottom: 0.6rem;
+    }
+
+    .header-top-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 0.75rem;
+      flex-wrap: wrap;
     }
 
     h1 {
       margin: 0;
-      font-size: 1.4rem;
+      font-size: 1.3rem;
       letter-spacing: 0.02em;
     }
 
-    .subtitle {
-      font-size: 0.85rem;
+    .header-actions {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 0.4rem;
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 999px;
+      border: 1px solid var(--chip-border);
+      font-size: 0.8rem;
+      padding: 0.25rem 0.75rem;
+      cursor: pointer;
+      background: #f9fafb;
+      color: var(--text);
+      transition:
+        background 120ms ease,
+        box-shadow 120ms ease,
+        transform 120ms ease,
+        border-color 120ms ease;
+      white-space: nowrap;
+    }
+
+    .btn-primary {
+      background: var(--accent);
+      color: #ffffff;
+      border-color: var(--accent);
+      box-shadow: 0 2px 4px rgba(37, 99, 235, 0.25);
+    }
+
+    .btn-primary:hover {
+      background: #1d4ed8;
+      transform: translateY(-0.5px);
+      box-shadow: 0 4px 10px rgba(37, 99, 235, 0.35);
+    }
+
+    .btn-ghost {
+      background: transparent;
+    }
+
+    .btn-ghost:hover {
+      background: #e5e7eb;
+    }
+
+    .btn-small {
+      font-size: 0.75rem;
+      padding: 0.15rem 0.55rem;
+    }
+
+    .btn-ok {
+      background: var(--ok-bg);
+      color: var(--ok);
+      border-color: #bbf7d0;
+    }
+
+    .btn-warn {
+      background: var(--warn-bg);
+      color: var(--warn);
+      border-color: #fecaca;
+    }
+
+    .btn:disabled {
+      opacity: 0.6;
+      cursor: default;
+      box-shadow: none;
+      transform: none;
+    }
+
+    .link {
+      font-size: 0.8rem;
+      color: var(--accent);
+      text-decoration: none;
+    }
+
+    .link:hover {
+      text-decoration: underline;
+    }
+
+    .rules-hint {
+      font-size: 0.75rem;
       color: var(--muted);
+      text-align: right;
+      max-width: 360px;
+      margin-left: auto;
+      margin-top: 0.15rem;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
     }
 
     .card {
       background: var(--card-bg);
       border-radius: 1rem;
-      border: 1px solid rgba(0, 0, 0, 0.04);
+      border: 1px solid rgba(15, 23, 42, 0.06);
       box-shadow: 0 12px 30px rgba(15, 23, 42, 0.06);
-      padding: 0.75rem 0.75rem 1rem;
+      padding: 0.8rem 0.8rem 0.9rem;
+    }
+
+    .filter-row {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 0.6rem;
+      margin-bottom: 0.6rem;
+    }
+
+    .filter-group {
       display: flex;
       flex-direction: column;
-      gap: 0.75rem;
+      gap: 0.2rem;
+      font-size: 0.76rem;
     }
 
-    .filters {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 0.5rem;
-      align-items: center;
-      justify-content: space-between;
-    }
-
-    .filters-left,
-    .filters-right {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 0.5rem;
-      align-items: center;
-    }
-
-    label {
-      font-size: 0.8rem;
+    .filter-label {
       color: var(--muted);
+    }
+
+    .filter-input-row {
+      display: flex;
+      align-items: center;
+      gap: 0.3rem;
+      flex-wrap: wrap;
+    }
+
+    input[type="text"] {
+      font-size: 0.8rem;
+      padding: 0.25rem 0.4rem;
+      border-radius: 0.5rem;
+      border: 1px solid var(--border);
+      min-width: 180px;
     }
 
     select {
@@ -93,501 +201,389 @@
       padding: 0.25rem 0.5rem;
       border-radius: 999px;
       border: 1px solid var(--border);
-      background: #fff;
+      background: #ffffff;
       outline: none;
-      min-width: 120px;
     }
 
+    input[type="text"]:focus,
     select:focus {
       border-color: var(--accent);
-      box-shadow: 0 0 0 1px rgba(0, 82, 204, 0.15);
+      box-shadow: 0 0 0 1px rgba(37, 99, 235, 0.18);
+      outline: none;
     }
 
-    .decision-filter-group {
-      display: inline-flex;
-      flex-wrap: wrap;
-      align-items: center;
-      gap: 0.4rem;
-      font-size: 0.78rem;
-    }
-
-    .decision-filter-group .filter-label {
-      font-size: 0.8rem;
-      color: var(--muted);
-      margin-right: 0.25rem;
-    }
-
-    .chk {
+    .chip-check {
       display: inline-flex;
       align-items: center;
       gap: 0.25rem;
-      margin-right: 0.2rem;
+      padding: 0.12rem 0.5rem;
+      border-radius: 999px;
+      border: 1px solid var(--chip-border);
+      background: var(--chip-bg);
       cursor: pointer;
+      font-size: 0.75rem;
     }
 
-    .chk input[type="checkbox"] {
-      accent-color: var(--accent);
+    .chip-check input[type="checkbox"] {
+      margin: 0;
     }
 
-    .table-container {
+    .table-wrapper {
       border-radius: 0.75rem;
-      border: 1px solid rgba(0, 0, 0, 0.06);
-      overflow: auto;
-      max-height: min(70vh, 800px);
-      background: #fff;
+      border: 1px solid var(--border);
+      overflow: hidden;
+      background: #ffffff;
     }
 
     table {
       width: 100%;
       border-collapse: collapse;
       font-size: 0.8rem;
-      min-width: 950px;
+      table-layout: fixed;
     }
 
     thead {
-      position: sticky;
-      top: 0;
-      z-index: 1;
-      background: linear-gradient(to bottom, #f7f7fb, #f0f1f7);
-      box-shadow: 0 1px 0 rgba(0, 0, 0, 0.04);
+      background: #f9fafb;
     }
 
     th,
     td {
-      padding: 0.4rem 0.6rem;
-      text-align: left;
-      border-bottom: 1px solid #ececf2;
+      padding: 0.35rem 0.4rem;
+      border-bottom: 1px solid #e5e7eb;
       vertical-align: middle;
+      text-align: left;
+      overflow: hidden;
+      text-overflow: ellipsis;
       white-space: nowrap;
     }
 
     th {
       font-weight: 600;
-      font-size: 0.75rem;
-      color: #555;
-      letter-spacing: 0.04em;
-      text-transform: uppercase;
+      color: #4b5563;
+      font-size: 0.78rem;
     }
 
-    tr:hover td {
+    tbody tr {
+      cursor: pointer;
+    }
+
+    tbody tr:hover td {
       background: #f9fafb;
     }
 
-    /* Grupp-visualisering per entityId – lite tydligare */
-tr.group-start td {
-  border-top: 3px solid #94a3b8;
-  background: linear-gradient(to right, #f9fafb, #ffffff);
-}
+    td.id-col {
+      width: 44px;
+      text-align: right;
+      color: var(--muted);
+      font-variant-numeric: tabular-nums;
+    }
 
+    td.orgnr-col {
+      width: 90px;
+      font-variant-numeric: tabular-nums;
+    }
 
-
-    td[data-col="bvName"],
-    td[data-col="entityOrgName"],
-    td[data-col="entityOrgDispName"] {
-      white-space: nowrap;
-      text-overflow: ellipsis;
-      max-width: 260px;
-      overflow: hidden;
+    td.actions-col {
+      width: 200px;
+      text-align: right;
     }
 
     .badge {
       display: inline-flex;
       align-items: center;
       justify-content: center;
-      padding: 0.1rem 0.55rem;
-      border-radius: var(--badge-radius);
+      padding: 0.05rem 0.4rem;
+      border-radius: 999px;
       font-size: 0.7rem;
-      font-weight: 600;
+      font-weight: 500;
     }
 
     .badge-ok {
-      background: var(--ok-soft);
+      background: var(--ok-bg);
       color: var(--ok);
-      border: 1px solid rgba(28, 148, 74, 0.15);
+      border: 1px solid #bbf7d0;
     }
 
-    .badge-kolla {
-      background: var(--warn-soft);
+    .badge-warn {
+      background: var(--warn-bg);
       color: var(--warn);
-      border: 1px solid rgba(197, 34, 31, 0.15);
+      border: 1px solid #fecaca;
     }
 
-    .btn {
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      border-radius: var(--btn-radius);
-      border: 1px solid transparent;
-      font-size: 0.75rem;
-      padding: 0.18rem 0.7rem;
-      cursor: pointer;
-      background: #f3f4f6;
-      color: #111827;
-      transition:
-        background var(--transition),
-        transform var(--transition),
-        box-shadow var(--transition),
-        border-color var(--transition),
-        color var(--transition);
-      white-space: nowrap;
-    }
-
-    .btn:disabled {
-      opacity: 0.4;
-      cursor: default;
-      transform: none;
-      box-shadow: none;
-    }
-
-    .btn-ghost {
-      background: transparent;
-      border-color: var(--border);
-      color: var(--muted);
-    }
-
-    .btn-primary {
-      background: var(--ok);
-      color: white;
-      box-shadow: 0 2px 5px rgba(16, 185, 129, 0.3);
-      border-color: rgba(16, 185, 129, 0.6);
-    }
-
-    .btn-danger {
-      background: var(--warn);
-      color: white;
-      border-color: rgba(197, 34, 31, 0.6);
-    }
-
-    .btn:hover:not(:disabled) {
-      transform: translateY(-0.5px);
-      box-shadow: 0 4px 10px rgba(15, 23, 42, 0.12);
+    .badge-neutral {
       background: #e5e7eb;
+      color: #374151;
+      border: 1px solid #d1d5db;
     }
 
-    .btn-primary:hover:not(:disabled) {
-      background: #0f7a34;
-    }
-
-    .btn-danger:hover:not(:disabled) {
-      background: #a6100f;
-    }
-
-    .btn-sm {
-      font-size: 0.7rem;
-      padding: 0.12rem 0.6rem;
-    }
-
-    .cell-actions {
-      display: inline-flex;
-      gap: 0.3rem;
+    .table-footer {
+      display: flex;
+      justify-content: space-between;
       align-items: center;
-    }
-
-    .pill {
-      border-radius: 999px;
-      background: #f9fafb;
-      border: 1px solid #e5e7eb;
-      padding: 0.18rem 0.7rem;
-      font-size: 0.7rem;
-      color: var(--muted);
-    }
-
-    .status-indicator {
-      font-size: 0.7rem;
-      color: var(--muted);
-    }
-
-    .status-dot {
-      display: inline-block;
-      width: 6px;
-      height: 6px;
-      border-radius: 999px;
-      background: #22c55e;
-      margin-right: 0.25rem;
-    }
-
-    .status-dot.loading {
-      background: #f97316;
-    }
-
-    .status-dot.error {
-      background: #ef4444;
-    }
-
-    .row-count {
+      padding-top: 0.4rem;
       font-size: 0.75rem;
       color: var(--muted);
-      white-space: nowrap;
+      flex-wrap: wrap;
+      gap: 0.3rem;
     }
 
-    .empty-state {
-      padding: 0.8rem;
-      font-size: 0.8rem;
+    .counter {
+      font-variant-numeric: tabular-nums;
+    }
+
+    .status-text {
+      font-size: 0.75rem;
       color: var(--muted);
+    }
+
+    .status-text strong {
+      font-weight: 600;
+    }
+
+    /* Grupp-visualisering per entityId – lite tydligare */
+    tr.group-start td {
+      border-top: 3px solid var(--border-strong);
+      background: linear-gradient(to right, #f9fafb, #ffffff);
     }
 
     /* Modal */
-
-    .modal {
+    .modal-backdrop {
       position: fixed;
       inset: 0;
+      background: rgba(15, 23, 42, 0.35);
       display: none;
       align-items: center;
       justify-content: center;
-      z-index: 50;
+      z-index: 30;
     }
 
-    .modal.show {
+    .modal-backdrop.show {
       display: flex;
     }
 
-    .modal-backdrop {
-      position: absolute;
-      inset: 0;
-      background: rgba(15, 23, 42, 0.45);
-    }
-
-    .modal-dialog {
-      position: relative;
-      background: #fff;
+    .modal {
+      background: #ffffff;
       border-radius: 0.9rem;
-      padding: 1rem 1.2rem 1rem;
+      padding: 0.9rem 1rem 0.9rem;
       max-width: 520px;
       width: 100%;
-      box-shadow: 0 18px 45px rgba(15, 23, 42, 0.3);
-      z-index: 1;
-      max-height: 80vh;
-      overflow: auto;
+      box-shadow: 0 18px 40px rgba(15, 23, 42, 0.35);
+      font-size: 0.8rem;
     }
 
-    .modal-header-row {
+    .modal-header {
       display: flex;
       align-items: center;
       justify-content: space-between;
       gap: 0.5rem;
-      margin-bottom: 0.35rem;
+      margin-bottom: 0.4rem;
     }
 
     .modal-title {
-      font-size: 0.95rem;
       font-weight: 600;
-    }
-
-    .modal-header-right {
-      display: flex;
-      align-items: center;
-      gap: 0.4rem;
-    }
-
-    .modal-status-badge {
-      font-size: 0.7rem;
-    }
-
-    .modal-badge {
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      padding: 0.1rem 0.6rem;
-      border-radius: 999px;
-      font-size: 0.7rem;
-      font-weight: 600;
-    }
-
-    .modal-badge-auto {
-      background: var(--ok-soft);
-      color: var(--ok);
-      border: 1px solid rgba(28, 148, 74, 0.2);
-    }
-
-    .modal-badge-manual-ok {
-      background: #e0ecff;
-      color: #1d4ed8;
-      border: 1px solid rgba(59, 130, 246, 0.3);
-    }
-
-    .modal-badge-manual-nekad {
-      background: var(--warn-soft);
-      color: var(--warn);
-      border: 1px solid rgba(220, 38, 38, 0.3);
-    }
-
-    .modal-badge-kolla {
-      background: var(--warn-soft);
-      color: var(--warn);
-      border: 1px solid rgba(220, 38, 38, 0.3);
-    }
-
-    .modal-copy-btn {
-      font-size: 0.7rem;
-      padding: 0.15rem 0.6rem;
-      border-radius: 999px;
-      border: 1px solid #d1d5db;
-      background: #f9fafb;
-      cursor: pointer;
-    }
-
-    .modal-copy-btn:hover {
-      background: #e5e7eb;
-    }
-
-    .modal-close {
-      position: absolute;
-      top: 0.4rem;
-      right: 0.5rem;
-      border: none;
-      background: transparent;
-      font-size: 1.1rem;
-      cursor: pointer;
-      color: #9ca3af;
-    }
-
-    .modal-close:hover {
-      color: #4b5563;
+      font-size: 0.9rem;
     }
 
     .modal-body {
-      font-size: 0.8rem;
       display: flex;
       flex-direction: column;
       gap: 0.25rem;
-      margin-top: 0.25rem;
+      margin-bottom: 0.6rem;
     }
 
     .modal-row {
-      display: grid;
-      grid-template-columns: 130px 1fr;
+      display: flex;
       gap: 0.4rem;
-      padding: 0.15rem 0;
-      border-bottom: 1px solid #f3f4f6;
     }
 
-    .modal-row-label {
-      font-weight: 600;
-      color: #4b5563;
+    .modal-label {
+      width: 110px;
+      color: var(--muted);
+      flex-shrink: 0;
     }
 
-    .modal-row-value {
-      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas,
-        "Liberation Mono", "Courier New", monospace;
-      white-space: pre-wrap;
-      word-break: break-word;
+    .modal-value {
+      flex: 1;
+      word-break: break-all;
+    }
+
+    .modal-footer {
+      display: flex;
+      justify-content: flex-end;
+      gap: 0.4rem;
+      align-items: center;
+    }
+
+    .copy-indicator {
+      font-size: 0.75rem;
+      color: var(--muted);
     }
 
     @media (max-width: 768px) {
       .page {
-        padding-inline: 0.75rem;
+        padding: 1rem 0.5rem 1.5rem;
       }
-      h1 {
-        font-size: 1.2rem;
+
+      .table-wrapper {
+        border-radius: 0.5rem;
       }
-      .modal-dialog {
-        max-width: 95vw;
+
+      th,
+      td {
+        padding: 0.3rem 0.3rem;
       }
-      .modal-row {
-        grid-template-columns: 110px 1fr;
+
+      .modal {
+        margin: 0 0.5rem;
       }
     }
   </style>
 </head>
 <body>
 <div class="page">
-  <header>
-    <h1>BV / Entity – Matchning</h1>
-    <div class="subtitle">
-      Jämför Bolagsverkets namn med metadata och flagga avvikelser.
+  <header class="page-header">
+    <div class="header-top-row">
+      <h1>BV / Metadata – validering</h1>
+      <div class="header-actions">
+        <button id="syncBtn" class="btn btn-primary" type="button">
+          Läs in metadata
+        </button>
+        <button id="exportCsvBtn" class="btn" type="button">
+          Exportera CSV
+        </button>
+        <button id="exportJsonBtn" class="btn" type="button">
+          Exportera JSON
+        </button>
+        <a href="/valideringsregler/" class="btn btn-ghost" type="button">
+          Valideringsregler
+        </a>
+      </div>
+    </div>
+    <div id="activeRulesHint" class="rules-hint">
+      Regler: läser in...
     </div>
   </header>
 
   <section class="card">
-    <div class="filters">
-      <div class="filters-left">
-        <div>
-          <label for="matchFilter">Match-filter</label><br />
+    <div class="filter-row">
+      <div class="filter-group">
+        <div class="filter-label">Sök</div>
+        <div class="filter-input-row">
+          <input
+            type="text"
+            id="searchInput"
+            placeholder="Filtrera på orgnr eller namn..."
+          />
+        </div>
+      </div>
+
+      <div class="filter-group">
+        <div class="filter-label">Match-filter</div>
+        <div class="filter-input-row">
           <select id="matchFilter">
             <option value="ALL">Alla</option>
-            <option value="OK">Endast OK</option>
-            <option value="KOLLA">Endast KOLLA</option>
+            <option value="OK">OK</option>
+            <option value="KOLLA">KOLLA</option>
           </select>
         </div>
+      </div>
 
-        <div class="decision-filter-group">
-          <span class="filter-label">Godkänn-filter</span>
-          <label class="chk">
-            <input type="checkbox" name="decisionFilter" value="NONE" checked />
-            Tom
+      <div class="filter-group">
+        <div class="filter-label">Godkänn-filter</div>
+        <div class="filter-input-row">
+          <label class="chip-check">
+            <input
+              type="checkbox"
+              class="godkann-filter"
+              value="Match"
+              checked
+            />
+            <span>Match</span>
           </label>
-          <label class="chk">
-            <input type="checkbox" name="decisionFilter" value="Match" checked />
-            Match
+          <label class="chip-check">
+            <input
+              type="checkbox"
+              class="godkann-filter"
+              value="Godkänd"
+              checked
+            />
+            <span>Godkänd</span>
           </label>
-          <label class="chk">
-            <input type="checkbox" name="decisionFilter" value="Godkänd" checked />
-            Godkänd
+          <label class="chip-check">
+            <input
+              type="checkbox"
+              class="godkann-filter"
+              value="Nekad"
+              checked
+            />
+            <span>Nekad</span>
           </label>
-          <label class="chk">
-            <input type="checkbox" name="decisionFilter" value="Nekad" checked />
-            Nekad
+          <label class="chip-check">
+            <input
+              type="checkbox"
+              class="godkann-filter"
+              value="Ej beslutad"
+              checked
+            />
+            <span>Ej beslutad</span>
           </label>
         </div>
       </div>
 
-      <div class="filters-right">
-        <span id="rowCount" class="row-count"></span>
-        <button id="syncButton" class="btn btn-sm btn-ghost">
-          Läs in metadata
-        </button>
-        <button id="exportCsvButton" class="btn btn-sm">
-          Exportera CSV
-        </button>
-        <button id="exportJsonButton" class="btn btn-sm btn-ghost">
-          Exportera JSON
-        </button>
-        <span id="statusIndicator" class="status-indicator">
-          <span class="status-dot loading"></span> Läser in...
-        </span>
+      <div class="filter-group" style="margin-left:auto;">
+        <div class="filter-label">Status</div>
+        <div class="filter-input-row">
+          <span id="rowCounter" class="counter">Visar 0 av 0 poster</span>
+        </div>
       </div>
     </div>
 
-    <div class="table-container" id="tableContainer">
+    <div class="table-wrapper">
       <table>
         <thead>
         <tr>
-          <th>ID</th>
-          <th>Orgnr</th>
+          <th style="width:44px;text-align:right;">ID</th>
+          <th style="width:90px;">Orgnr</th>
           <th>BV: Namn</th>
           <th>Entity: OrgName</th>
           <th>Entity: OrgDispName</th>
-          <th>Match</th>
-          <th>Godkänn</th>
+          <th style="width:70px;">Match</th>
+          <th style="width:220px;text-align:right;">Godkänn</th>
         </tr>
         </thead>
         <tbody id="tableBody">
-        <tr>
-          <td colspan="7" class="empty-state">
-            Hämtar data från servern...
-          </td>
-        </tr>
         </tbody>
       </table>
+    </div>
+
+    <div class="table-footer">
+      <div id="syncStatus" class="status-text"></div>
+      <div id="tableStatus" class="status-text"></div>
     </div>
   </section>
 </div>
 
-<!-- Modal -->
-<div id="detailModal" class="modal">
-  <div id="modalBackdrop" class="modal-backdrop"></div>
-  <div class="modal-dialog">
-    <button id="modalClose" class="modal-close" type="button">&times;</button>
-    <div class="modal-header-row">
-      <div class="modal-title">Detaljer</div>
-      <div class="modal-header-right">
-        <div id="modalStatusBadge" class="modal-status-badge"></div>
-        <button id="modalCopyBtn" class="modal-copy-btn" type="button">
-          Kopiera
-        </button>
+<!-- Modal för rad-detaljer -->
+<div id="modalBackdrop" class="modal-backdrop">
+  <div class="modal">
+    <div class="modal-header">
+      <div>
+        <div class="modal-title">Detaljer för rad</div>
+        <div id="modalBadgeContainer"></div>
       </div>
+      <button id="modalCloseBtn" class="btn btn-ghost btn-small" type="button">
+        Stäng
+      </button>
     </div>
-    <div id="modalContent" class="modal-body"></div>
+    <div class="modal-body" id="modalBody">
+      <!-- Fylls via JS -->
+    </div>
+    <div class="modal-footer">
+      <span id="copyIndicator" class="copy-indicator"></span>
+      <button id="copyBtn" class="btn btn-small" type="button">
+        Kopiera innehåll
+      </button>
+    </div>
   </div>
 </div>
 
@@ -595,628 +591,706 @@ tr.group-start td {
   (function () {
     const API_BASE = "/api";
 
-    let allRows = [];
-    let filteredRows = [];
-    let isLoading = false;
-    let currentModalRow = null;
-
-    const matchFilterEl = document.getElementById("matchFilter");
-    const decisionFilterBoxes = Array.from(
-      document.querySelectorAll('input[name="decisionFilter"]')
+    const searchInput = document.getElementById("searchInput");
+    const matchFilter = document.getElementById("matchFilter");
+    const godkannFilterCheckboxes = Array.from(
+      document.querySelectorAll(".godkann-filter")
     );
+    const rowCounter = document.getElementById("rowCounter");
     const tableBody = document.getElementById("tableBody");
-    const statusIndicator = document.getElementById("statusIndicator");
-    const syncButton = document.getElementById("syncButton");
-    const exportCsvButton = document.getElementById("exportCsvButton");
-    const exportJsonButton = document.getElementById("exportJsonButton");
-    const rowCountEl = document.getElementById("rowCount");
+    const syncBtn = document.getElementById("syncBtn");
+    const exportCsvBtn = document.getElementById("exportCsvBtn");
+    const exportJsonBtn = document.getElementById("exportJsonBtn");
+    const syncStatus = document.getElementById("syncStatus");
+    const tableStatus = document.getElementById("tableStatus");
+    const activeRulesHintEl = document.getElementById("activeRulesHint");
 
-    const detailModal = document.getElementById("detailModal");
     const modalBackdrop = document.getElementById("modalBackdrop");
-    const modalCloseBtn = document.getElementById("modalClose");
-    const modalContent = document.getElementById("modalContent");
-    const modalCopyBtn = document.getElementById("modalCopyBtn");
+    const modalBody = document.getElementById("modalBody");
+    const modalBadgeContainer = document.getElementById("modalBadgeContainer");
+    const modalCloseBtn = document.getElementById("modalCloseBtn");
+    const copyBtn = document.getElementById("copyBtn");
+    const copyIndicator = document.getElementById("copyIndicator");
 
-    function setStatus(text, mode) {
-      statusIndicator.innerHTML = "";
-      const dot = document.createElement("span");
-      dot.className = "status-dot";
-      if (mode === "loading") dot.classList.add("loading");
-      if (mode === "error") dot.classList.add("error");
-      statusIndicator.appendChild(dot);
-      const span = document.createElement("span");
-      span.textContent = " " + text;
-      statusIndicator.appendChild(span);
+    let allRows = [];
+    let rowByOrgnr = {};
+    let uiRowState = {}; // orgnr -> { mode: 'idle' | 'choose', pendingDecision: 'Godkänd'|'Nekad'|null }
+    let selectedRowForModal = null;
+
+    function setTableStatus(msg) {
+      tableStatus.textContent = msg || "";
     }
 
-    function updateRowCount() {
-      if (!rowCountEl) return;
-      rowCountEl.textContent = filteredRows.length + " poster";
+    function setSyncStatus(msg) {
+      syncStatus.textContent = msg || "";
     }
 
-    async function fetchTable() {
-      isLoading = true;
-      setStatus("Läser in...", "loading");
-      try {
-        const res = await fetch(API_BASE + "/table", {
-          method: "GET",
-          headers: {
-            accept: "application/json",
-          },
-        });
-        if (!res.ok) {
-          throw new Error("HTTP " + res.status);
-        }
-        const data = await res.json();
-
-        // Ta bara riktiga organisationer, filtrera bort __meta__-keys
-        allRows = (Array.isArray(data.rows) ? data.rows : [])
-          .filter(
-            (row) =>
-              row &&
-              row.orgnr &&
-              !String(row.orgnr).startsWith("__meta__")
-          )
-          // Sortera så att poster med samma entityId hålls ihop
-          .sort((a, b) => {
-            const eA = a.entityId || "";
-            const eB = b.entityId || "";
-            if (eA !== eB) {
-              return String(eA).localeCompare(String(eB));
-            }
-            return String(a.orgnr || "").localeCompare(String(b.orgnr || ""));
-          });
-
-        // Tilldela stabilt löpnummer (ID) baserat på sorterad ordning
-        allRows.forEach((row, idx) => {
-          row._id = idx + 1;
-        });
-
-        filteredRows = allRows.slice();
-        applyFilters();
-        setStatus(`Klar – ${allRows.length} rader totalt`, "ok");
-      } catch (err) {
-        console.error(err);
-        tableBody.innerHTML =
-          '<tr><td colspan="7" class="empty-state">Kunde inte läsa data från servern. Försök igen eller kontrollera loggarna.</td></tr>';
-        filteredRows = [];
-        updateRowCount();
-        setStatus("Fel vid hämtning", "error");
-      } finally {
-        isLoading = false;
+    function describeSourceShort(source, generic) {
+      switch (source) {
+        case "BV":
+          return "BV";
+        case "GENERIC":
+          return `GEN:"${generic || ""}"`;
+        case "CONCAT":
+          return `BV+GEN:"${generic || ""}"`;
+        default:
+          return source || "?";
       }
     }
 
-    function applyFilters() {
-      const matchF = matchFilterEl.value;
-
-      const selectedDecisions = decisionFilterBoxes
-        .filter((cb) => cb.checked)
-        .map((cb) => cb.value);
-
-      filteredRows = allRows.filter((row) => {
-        // Match-filter
-        if (matchF !== "ALL" && row.match !== matchF) {
-          return false;
-        }
-
-        // Godkänn-filter: NONE / Match / Godkänd / Nekad
-        const dec = row.decision || null;
-        let bucket;
-
-        if (dec === "Godkänd" || dec === "Nekad") {
-          bucket = dec;
-        } else if (row.match === "OK") {
-          bucket = "Match";
-        } else {
-          bucket = "NONE";
-        }
-
-        if (selectedDecisions.length === 0) {
-          return false;
-        }
-
-        return selectedDecisions.includes(bucket);
-      });
-
-      renderTable();
-      updateRowCount();
+    function describeMatchShort(type) {
+      return type === "fuzzy" ? "fuzzy" : "exakt";
     }
 
-    function renderTable() {
-      if (!filteredRows.length) {
-        tableBody.innerHTML =
-          '<tr><td colspan="7" class="empty-state">Inga rader matchar nuvarande filter.</td></tr>';
+    function updateActiveRulesHint(activeRules) {
+      if (!activeRulesHintEl) return;
+
+      if (!activeRules) {
+        activeRulesHintEl.textContent =
+          "Regler: standard (OrgName = BV/exakt, OrgDispName = BV/fuzzy)";
         return;
       }
 
-      tableBody.innerHTML = "";
+      const orgName = activeRules.orgName || {};
+      const orgDisp = activeRules.orgDispName || {};
 
-      let prevEntityId = null;
+      const orgNameText = `${describeSourceShort(
+        orgName.source,
+        orgName.generic
+      )}/${describeMatchShort(activeRules.orgNameMatchType)}`;
 
-      for (const row of filteredRows) {
-        const tr = document.createElement("tr");
+      const orgDispText = `${describeSourceShort(
+        orgDisp.source,
+        orgDisp.generic
+      )}/${describeMatchShort(activeRules.orgDispNameMatchType)}`;
 
-        const currentEntityId = row.entityId || null;
-        const isNewGroup = currentEntityId !== prevEntityId;
-        if (isNewGroup) {
-          tr.classList.add("group-start");
+      activeRulesHintEl.textContent = `Regler: OrgName = ${orgNameText}, OrgDispName = ${orgDispText}`;
+    }
+
+    function normalizeStr(str) {
+      if (!str) return "";
+      return String(str).toLowerCase();
+    }
+
+    function computeGodkannStatus(row) {
+      const match = row.match === "OK" ? "OK" : "KOLLA";
+      if (row.decision === "Godkänd") return "Godkänd";
+      if (row.decision === "Nekad") return "Nekad";
+      if (match === "OK") return "Match";
+      return "Ej beslutad";
+    }
+
+    function getRowUiState(orgnr) {
+      if (!uiRowState[orgnr]) {
+        uiRowState[orgnr] = { mode: "idle", pendingDecision: null };
+      }
+      return uiRowState[orgnr];
+    }
+
+    function clearRowUiState(orgnr) {
+      delete uiRowState[orgnr];
+    }
+
+    function applyFilters() {
+      const search = normalizeStr(searchInput.value);
+      const matchVal = matchFilter.value;
+      const selectedGodkann = new Set(
+        godkannFilterCheckboxes
+          .filter((cb) => cb.checked)
+          .map((cb) => cb.value)
+      );
+
+      return allRows.filter((row) => {
+        // Sök
+        if (search) {
+          const haystack =
+            (row.orgnr || "") +
+            " " +
+            (row.bvName || "") +
+            " " +
+            (row.entityOrgName || "") +
+            " " +
+            (row.entityOrgDispName || "");
+          if (!normalizeStr(haystack).includes(search)) {
+            return false;
+          }
         }
-        prevEntityId = currentEntityId;
 
-        const tdId = document.createElement("td");
-        tdId.textContent = row._id ?? "";
-        tr.appendChild(tdId);
+        // Match-filter
+        if (matchVal !== "ALL") {
+          const m = row.match === "OK" ? "OK" : "KOLLA";
+          if (m !== matchVal) return false;
+        }
 
-        const tdOrgnr = document.createElement("td");
-        tdOrgnr.textContent = row.orgnr ?? "";
-        tr.appendChild(tdOrgnr);
+        // Godkänn-filter (Match / Godkänd / Nekad / Ej beslutad)
+        const status = computeGodkannStatus(row);
+        if (!selectedGodkann.has(status)) return false;
 
-        const tdBvName = document.createElement("td");
-        tdBvName.textContent = row.bvName ?? "";
-        tdBvName.setAttribute("data-col", "bvName");
-        tr.appendChild(tdBvName);
-
-        const tdOrgName = document.createElement("td");
-        tdOrgName.textContent = row.entityOrgName ?? "";
-        tdOrgName.setAttribute("data-col", "entityOrgName");
-        tr.appendChild(tdOrgName);
-
-        const tdOrgDispName = document.createElement("td");
-        tdOrgDispName.textContent = row.entityOrgDispName ?? "";
-        tdOrgDispName.setAttribute("data-col", "entityOrgDispName");
-        tr.appendChild(tdOrgDispName);
-
-        const tdMatch = document.createElement("td");
-        const badge = document.createElement("span");
-        badge.className =
-          "badge " + (row.match === "OK" ? "badge-ok" : "badge-kolla");
-        badge.textContent = row.match === "OK" ? "OK" : "KOLLA";
-        tdMatch.appendChild(badge);
-        tr.appendChild(tdMatch);
-
-        const tdActions = document.createElement("td");
-        tdActions.appendChild(buildActionCell(row));
-        tr.appendChild(tdActions);
-
-        // Klick på rad öppnar modal (men inte om man klickar på knappar)
-        tr.addEventListener("click", (e) => {
-          if (e.target.closest("button")) return;
-          openModal(row);
-        });
-
-        tableBody.appendChild(tr);
-      }
+        return true;
+      });
     }
 
-    function buildActionCell(row) {
-      const container = document.createElement("div");
-      container.className = "cell-actions";
+    function badgeHtmlForMatch(match) {
+      const m = match === "OK" ? "OK" : "KOLLA";
+      if (m === "OK") {
+        return '<span class="badge badge-ok">OK</span>';
+      }
+      return '<span class="badge badge-warn">KOLLA</span>';
+    }
 
-      // 1) Beslut finns: visa pill + Ändra (RESET mot backend)
-      if (row.decision === "Godkänd" || row.decision === "Nekad") {
-        const pill = document.createElement("span");
-        pill.className = "pill";
-        pill.textContent = row.decision; // "Godkänd" eller "Nekad"
-        container.appendChild(pill);
+    function renderGodkannCell(row) {
+      const ui = getRowUiState(row.orgnr);
+      const match = row.match === "OK" ? "OK" : "KOLLA";
 
-        const changeBtn = document.createElement("button");
-        changeBtn.type = "button";
-        changeBtn.className = "btn btn-sm btn-ghost";
-        changeBtn.textContent = "Ändra";
-        changeBtn.addEventListener("click", (ev) => {
-          ev.stopPropagation();
-          resetDecision(row);
-        });
-
-        container.appendChild(changeBtn);
-        return container;
+      if (ui.mode === "choose") {
+        // Vi har ett val som väntar på SPARA/ÅNGRA
+        const label = ui.pendingDecision === "Nekad" ? "Neka" : "Godkänn";
+        return (
+          '<span style="margin-right:0.4rem;font-size:0.75rem;">Val: ' +
+          label +
+          "</span>" +
+          '<button class="btn btn-small btn-ok" data-action="save" data-orgnr="' +
+          row.orgnr +
+          '">SPARA</button>' +
+          '<button class="btn btn-small btn-warn" data-action="cancel" data-orgnr="' +
+          row.orgnr +
+          '">ÅNGRA</button>'
+        );
       }
 
-      // 2) Auto-match (match = OK, inget beslut): visa Match + Ändra
-      if (row.match === "OK") {
-        const pill = document.createElement("span");
-        pill.className = "pill";
-        pill.textContent = "Match";
-        container.appendChild(pill);
-
-        const changeBtn = document.createElement("button");
-        changeBtn.type = "button";
-        changeBtn.className = "btn btn-sm btn-ghost";
-        changeBtn.textContent = "Ändra";
-        changeBtn.addEventListener("click", (ev) => {
-          ev.stopPropagation();
-          renderManualDecisionButtons(container, row);
-        });
-
-        container.appendChild(changeBtn);
-        return container;
+      // Idle-läge
+      if (row.decision === "Godkänd") {
+        return (
+          '<span style="margin-right:0.4rem;">Godkänd</span>' +
+          '<button class="btn btn-small" data-action="change" data-orgnr="' +
+          row.orgnr +
+          '">Ändra</button>'
+        );
       }
 
-      // 3) Ingen match/decision: manuellt GODKÄNN/NEKA-läge direkt
-      renderManualDecisionButtons(container, row);
-      return container;
+      if (row.decision === "Nekad") {
+        return (
+          '<span style="margin-right:0.4rem;">Nekad</span>' +
+          '<button class="btn btn-small" data-action="change" data-orgnr="' +
+          row.orgnr +
+          '">Ändra</button>'
+        );
+      }
+
+      if (match === "OK") {
+        // Automatisk match, men man ska kunna ändra
+        return (
+          '<span style="margin-right:0.4rem;">Match</span>' +
+          '<button class="btn btn-small" data-action="change" data-orgnr="' +
+          row.orgnr +
+          '">Ändra</button>'
+        );
+      }
+
+      // match = KOLLA, inget beslut => visa GODKÄNN/NEKA
+      return (
+        '<button class="btn btn-small btn-ok" data-action="approve" data-orgnr="' +
+        row.orgnr +
+        '">GODKÄNN</button>' +
+        '<button class="btn btn-small btn-warn" style="margin-left:0.25rem;" data-action="reject" data-orgnr="' +
+        row.orgnr +
+        '">NEKA</button>'
+      );
     }
 
-    function renderManualDecisionButtons(container, row) {
-      container.innerHTML = "";
+    function renderTable() {
+      const filtered = applyFilters();
+      rowCounter.textContent =
+        "Visar " + filtered.length + " av " + allRows.length + " poster";
 
-      const approveBtn = document.createElement("button");
-      approveBtn.type = "button";
-      approveBtn.className = "btn btn-sm btn-primary";
-      approveBtn.textContent = "GODKÄNN";
+      if (!filtered.length) {
+        tableBody.innerHTML =
+          '<tr><td colspan="7" style="text-align:center;color:#9ca3af;padding:0.6rem;">Inga poster matchar filtret.</td></tr>';
+        return;
+      }
 
-      const rejectBtn = document.createElement("button");
-      rejectBtn.type = "button";
-      rejectBtn.className = "btn btn-sm btn-danger";
-      rejectBtn.textContent = "NEKA";
+      let html = "";
+      let lastEntityGroup = null;
 
-      approveBtn.addEventListener("click", (ev) => {
-        ev.stopPropagation();
-        enterSaveState(container, row, "Godkänd");
-      });
-      rejectBtn.addEventListener("click", (ev) => {
-        ev.stopPropagation();
-        enterSaveState(container, row, "Nekad");
-      });
+      for (const row of filtered) {
+        const groupKey =
+          row.entityId && row.entityId !== "null" ? row.entityId : "__" + row.orgnr;
+        const isGroupStart = groupKey !== lastEntityGroup;
+        lastEntityGroup = groupKey;
 
-      container.appendChild(approveBtn);
-      container.appendChild(rejectBtn);
+        const trClass = isGroupStart ? "group-start" : "";
+        const matchBadge = badgeHtmlForMatch(row.match);
+        const godkannHtml = renderGodkannCell(row);
+        const escapedId = String(row._id ?? "");
+        const escapedOrgnr = row.orgnr ?? "";
+        const escapedBvName = row.bvName ?? "";
+        const escapedOrgName = row.entityOrgName ?? "";
+        const escapedOrgDisp = row.entityOrgDispName ?? "";
+
+        html +=
+          '<tr class="' +
+          trClass +
+          '" data-orgnr="' +
+          escapedOrgnr +
+          '">' +
+          '<td class="id-col">' +
+          escapedId +
+          "</td>" +
+          '<td class="orgnr-col">' +
+          escapedOrgnr +
+          "</td>" +
+          "<td>" +
+          escapedBvName +
+          "</td>" +
+          "<td>" +
+          escapedOrgName +
+          "</td>" +
+          "<td>" +
+          escapedOrgDisp +
+          "</td>" +
+          "<td>" +
+          matchBadge +
+          "</td>" +
+          '<td class="actions-col">' +
+          godkannHtml +
+          "</td>" +
+          "</tr>";
+      }
+
+      tableBody.innerHTML = html;
     }
 
-    function enterSaveState(container, row, pendingDecision) {
-      container.innerHTML = "";
-
-      const saveBtn = document.createElement("button");
-      saveBtn.type = "button";
-      saveBtn.className = "btn btn-sm btn-primary";
-      saveBtn.textContent = "SPARA";
-
-      const cancelBtn = document.createElement("button");
-      cancelBtn.type = "button";
-      cancelBtn.className = "btn btn-sm btn-ghost";
-      cancelBtn.textContent = "ÅNGRA";
-
-      saveBtn.addEventListener("click", async (ev) => {
-        ev.stopPropagation();
-        saveBtn.disabled = true;
-        cancelBtn.disabled = true;
-        await saveDecision(row, pendingDecision);
-      });
-
-      cancelBtn.addEventListener("click", (ev) => {
-        ev.stopPropagation();
-        container.replaceWith(buildActionCell(row));
-      });
-
-      container.appendChild(saveBtn);
-      container.appendChild(cancelBtn);
-    }
-
-    async function saveDecision(row, decision) {
+    async function fetchTable() {
+      setTableStatus("Läser in tabell...");
       try {
-        const res = await fetch(API_BASE + "/decision", {
-          method: "POST",
-          headers: {
-            "content-type": "application/json",
-            accept: "application/json",
-          },
-          body: JSON.stringify({ orgnr: row.orgnr, decision }),
+        const res = await fetch(API_BASE + "/table", {
+          headers: { accept: "application/json" },
+        });
+        if (!res.ok) throw new Error("HTTP " + res.status);
+        const data = await res.json();
+        const rows = Array.isArray(data.rows) ? data.rows : [];
+        const activeRules = data.activeRules;
+
+        updateActiveRulesHint(activeRules);
+
+        // sortera per entityId + orgnr
+        rows.sort((a, b) => {
+          const aId = a.entityId || "";
+          const bId = b.entityId || "";
+          if (aId < bId) return -1;
+          if (aId > bId) return 1;
+          const aName = (a.bvName || a.orgnr || "").toUpperCase();
+          const bName = (b.bvName || b.orgnr || "").toUpperCase();
+          if (aName < bName) return -1;
+          if (aName > bName) return 1;
+          return (a.orgnr || "").localeCompare(b.orgnr || "");
         });
 
-        if (!res.ok) {
-          throw new Error("HTTP " + res.status);
+        // Tilldela löpnummer ID (stabilt tills nästa KV-uppdatering)
+        rows.forEach((row, index) => {
+          row._id = index + 1;
+        });
+
+        allRows = rows;
+        rowByOrgnr = {};
+        uiRowState = {};
+        for (const row of allRows) {
+          if (row.orgnr) {
+            rowByOrgnr[row.orgnr] = row;
+          }
         }
 
-        const updated = await res.json();
-
-        const idx = allRows.findIndex((r) => r.orgnr === updated.orgnr);
-        if (idx !== -1) {
-          updated._id = allRows[idx]._id;
-          allRows[idx] = updated;
-        }
-
-        Object.assign(row, updated);
-
-        applyFilters();
-        setStatus("Beslut sparat", "ok");
+        setTableStatus(
+          "Tabell inläst. " +
+            allRows.length +
+            " poster (exkl. meta) i VALIDATE_MD_TABLE."
+        );
+        renderTable();
       } catch (err) {
         console.error(err);
-        setStatus("Kunde inte spara beslut", "error");
-        alert("Kunde inte spara beslutet. Kontrollera loggarna och försök igen.");
+        setTableStatus(
+          "Kunde inte läsa in tabellen. Kontrollera loggarna och försök igen."
+        );
+        allRows = [];
+        rowByOrgnr = {};
+        uiRowState = {};
+        renderTable();
       }
     }
 
-    async function resetDecision(row) {
+    async function syncMetadata() {
+      if (
+        !confirm(
+          "VARNING: Är du säker på att du vill läsa in metadata? Inläsningen kan ta upp till 20 minuter."
+        )
+      ) {
+        return;
+      }
+
+      setSyncStatus("Startar inläsning...");
+      syncBtn.disabled = true;
+
+      let cursor = null;
+      let totalProcessed = 0;
+      let batchCount = 0;
+
       try {
-        const res = await fetch(API_BASE + "/decision", {
-          method: "POST",
-          headers: {
-            "content-type": "application/json",
-            accept: "application/json",
-          },
-          body: JSON.stringify({ orgnr: row.orgnr, decision: "RESET" }),
-        });
-
-        if (!res.ok) {
-          throw new Error("HTTP " + res.status);
+        while (true) {
+          const url =
+            API_BASE +
+            "/sync-metadata" +
+            (cursor ? "?cursor=" + encodeURIComponent(cursor) : "");
+          const res = await fetch(url, {
+            method: "POST",
+            headers: { accept: "application/json" },
+          });
+          if (!res.ok) {
+            throw new Error("HTTP " + res.status);
+          }
+          const data = await res.json();
+          totalProcessed += data.processed || 0;
+          batchCount += 1;
+          setSyncStatus(
+            "Inläsning pågår... bearbetade " +
+              totalProcessed +
+              " poster i " +
+              batchCount +
+              " batchar."
+          );
+          if (data.done || !data.cursor) {
+            break;
+          }
+          cursor = data.cursor;
         }
 
-        const updated = await res.json();
-
-        const idx = allRows.findIndex((r) => r.orgnr === updated.orgnr);
-        if (idx !== -1) {
-          updated._id = allRows[idx]._id;
-          allRows[idx] = updated;
-        }
-
-        Object.assign(row, updated);
-
-        applyFilters();
-        setStatus("Beslut återställt", "ok");
+        setSyncStatus(
+          "Inläsning klar. Totalt bearbetade poster: " + totalProcessed + "."
+        );
+        // Läs om tabellen efter lyckad inläsning
+        await fetchTable();
       } catch (err) {
         console.error(err);
-        setStatus("Kunde inte återställa beslut", "error");
-        alert("Kunde inte återställa beslutet. Kontrollera loggarna och försök igen.");
+        setSyncStatus(
+          "Fel vid inläsning av metadata. Kontrollera worker-loggarna."
+        );
+      } finally {
+        syncBtn.disabled = false;
       }
     }
 
-    function downloadFile(filename, mime, content) {
-      const blob = new Blob([content], { type: mime });
+    function buildCsv(rows) {
+      const header = [
+        "ID",
+        "Orgnr",
+        "BV_Namn",
+        "Entity_OrgName",
+        "Entity_OrgDispName",
+        "EntityID",
+        "Match",
+        "Decision",
+      ];
+      const lines = [header.join(";")];
+
+      for (const row of rows) {
+        const fields = [
+          row._id ?? "",
+          row.orgnr ?? "",
+          row.bvName ?? "",
+          row.entityOrgName ?? "",
+          row.entityOrgDispName ?? "",
+          row.entityId ?? "",
+          row.match ?? "",
+          row.decision ?? "",
+        ];
+        const escaped = fields.map((v) => {
+          const s = v == null ? "" : String(v);
+          if (s.includes(";") || s.includes('"') || s.includes("\n")) {
+            return '"' + s.replace(/"/g, '""') + '"';
+          }
+          return s;
+        });
+        lines.push(escaped.join(";"));
+      }
+
+      return lines.join("\r\n");
+    }
+
+    function downloadBlob(filename, mimeType, content) {
+      const blob = new Blob([content], { type: mimeType });
       const url = URL.createObjectURL(blob);
       const a = document.createElement("a");
       a.href = url;
       a.download = filename;
       document.body.appendChild(a);
       a.click();
-      a.remove();
+      document.body.removeChild(a);
       URL.revokeObjectURL(url);
     }
 
-    function exportFilteredAsCsv() {
-      if (!filteredRows.length) {
-        alert("Det finns inga rader i den filtrerade listan att exportera.");
+    function exportCsv() {
+      const filtered = applyFilters();
+      if (!filtered.length) {
+        alert("Det finns inga poster att exportera med nuvarande filter.");
         return;
       }
+      const csv = buildCsv(filtered);
+      downloadBlob("validering_export.csv", "text/csv;charset=utf-8;", csv);
+    }
 
-      const headers = [
-        "id",
-        "orgnr",
-        "entityId",
-        "bvName",
-        "entityOrgName",
-        "entityOrgDispName",
-        "match",
-        "decision",
-        "decidedAt",
-      ];
+    function exportJson() {
+      const filtered = applyFilters();
+      if (!filtered.length) {
+        alert("Det finns inga poster att exportera med nuvarande filter.");
+        return;
+      }
+      const payload = filtered.map((row) => ({
+        id: row._id ?? null,
+        orgnr: row.orgnr ?? null,
+        bvName: row.bvName ?? null,
+        entityOrgName: row.entityOrgName ?? null,
+        entityOrgDispName: row.entityOrgDispName ?? null,
+        entityId: row.entityId ?? null,
+        match: row.match ?? null,
+        decision: row.decision ?? null,
+      }));
+      const json = JSON.stringify(payload, null, 2);
+      downloadBlob(
+        "validering_export.json",
+        "application/json;charset=utf-8;",
+        json
+      );
+    }
 
-      const sep = ";";
+    async function saveDecision(orgnr) {
+      const ui = getRowUiState(orgnr);
+      if (!ui.pendingDecision) {
+        alert("Ingen ändring vald.");
+        return;
+      }
+      const decision = ui.pendingDecision;
+      try {
+        const res = await fetch(API_BASE + "/decision", {
+          method: "POST",
+          headers: {
+            "content-type": "application/json",
+            accept: "application/json",
+          },
+          body: JSON.stringify({ orgnr, decision }),
+        });
+        if (!res.ok) throw new Error("HTTP " + res.status);
+        const data = await res.json();
+        const row = rowByOrgnr[orgnr];
+        if (row) {
+          row.decision = data.decision;
+          row.decidedAt = data.decidedAt;
+        }
+        clearRowUiState(orgnr);
+        renderTable();
+      } catch (err) {
+        console.error(err);
+        alert("Kunde inte spara beslutet. Kontrollera loggarna och försök igen.");
+      }
+    }
 
-      const escape = (value) => {
-        if (value === null || value === undefined) return "";
-        const s = String(value).replace(/"/g, '""');
-        return `"${s}"`;
-      };
+    async function resetDecision(orgnr) {
+      try {
+        const res = await fetch(API_BASE + "/decision", {
+          method: "POST",
+          headers: {
+            "content-type": "application/json",
+            accept: "application/json",
+          },
+          body: JSON.stringify({ orgnr, decision: "RESET" }),
+        });
+        if (!res.ok) throw new Error("HTTP " + res.status);
+        const data = await res.json();
+        const row = rowByOrgnr[orgnr];
+        if (row) {
+          row.decision = data.decision;
+          row.decidedAt = data.decidedAt;
+        }
+      } catch (err) {
+        console.error(err);
+        alert(
+          "Kunde inte återställa beslutet. Kontrollera loggarna och försök igen."
+        );
+      }
+    }
+
+    function openModalForRow(row) {
+      selectedRowForModal = row;
+      if (!row) return;
+
+      const status = computeGodkannStatus(row);
+
+      let badgeHtml = "";
+      const matchBadge = badgeHtmlForMatch(row.match);
+      let statusBadge = "";
+      if (status === "Godkänd") {
+        statusBadge =
+          '<span class="badge badge-ok" style="margin-left:0.25rem;">Godkänd</span>';
+      } else if (status === "Nekad") {
+        statusBadge =
+          '<span class="badge badge-warn" style="margin-left:0.25rem;">Nekad</span>';
+      } else if (status === "Match") {
+        statusBadge =
+          '<span class="badge badge-neutral" style="margin-left:0.25rem;">Match</span>';
+      } else {
+        statusBadge =
+          '<span class="badge badge-neutral" style="margin-left:0.25rem;">Ej beslutad</span>';
+      }
+      badgeHtml = matchBadge + statusBadge;
+      modalBadgeContainer.innerHTML = badgeHtml;
 
       const lines = [];
-      lines.push(headers.map(escape).join(sep));
+      lines.push(modalRowHtml("ID", row._id ?? ""));
+      lines.push(modalRowHtml("Orgnr", row.orgnr ?? ""));
+      lines.push(modalRowHtml("EntityID", row.entityId ?? ""));
+      lines.push(modalRowHtml("BV: Namn", row.bvName ?? ""));
+      lines.push(
+        modalRowHtml("Entity: OrgName", row.entityOrgName ?? "")
+      );
+      lines.push(
+        modalRowHtml("Entity: OrgDispName", row.entityOrgDispName ?? "")
+      );
+      lines.push(modalRowHtml("Match", row.match ?? ""));
+      lines.push(modalRowHtml("Godkänn", status));
 
-      for (const row of filteredRows) {
-        const line = [
-          row._id ?? "",
-          row.orgnr ?? "",
-          row.entityId ?? "",
-          row.bvName ?? "",
-          row.entityOrgName ?? "",
-          row.entityOrgDispName ?? "",
-          row.match ?? "",
-          row.decision ?? "",
-          row.decidedAt ?? "",
-        ]
-          .map(escape)
-          .join(sep);
-        lines.push(line);
-      }
-
-      const csvContent = "\uFEFF" + lines.join("\r\n");
-      const ts = new Date().toISOString().replace(/[:T]/g, "-").slice(0, 16);
-      const filename = `metadata-export-${ts}.csv`;
-
-      downloadFile(filename, "text/csv;charset=utf-8;", csvContent);
+      modalBody.innerHTML = lines.join("");
+      copyIndicator.textContent = "";
+      modalBackdrop.classList.add("show");
     }
 
-    function exportFilteredAsJson() {
-      if (!filteredRows.length) {
-        alert("Det finns inga rader i den filtrerade listan att exportera.");
-        return;
-      }
-
-      const json = JSON.stringify(filteredRows, null, 2);
-      const ts = new Date().toISOString().replace(/[:T]/g, "-").slice(0, 16);
-      const filename = `metadata-export-${ts}.json`;
-
-      downloadFile(filename, "application/json;charset=utf-8;", json);
+    function modalRowHtml(label, value) {
+      return (
+        '<div class="modal-row">' +
+        '<div class="modal-label">' +
+        label +
+        "</div>" +
+        '<div class="modal-value">' +
+        (value || "") +
+        "</div>" +
+        "</div>"
+      );
     }
 
-    function openModal(row) {
-      if (!row) return;
-      currentModalRow = row;
+    function closeModal() {
+      modalBackdrop.classList.remove("show");
+      selectedRowForModal = null;
+    }
 
-      const badgeHost = document.getElementById("modalStatusBadge");
-      if (badgeHost) {
-        badgeHost.innerHTML = "";
+    async function copyModalContent() {
+      if (!selectedRowForModal) return;
+      const row = selectedRowForModal;
+      const status = computeGodkannStatus(row);
 
-        const badge = document.createElement("span");
-        badge.classList.add("modal-badge");
-
-        if (row.decision === "Godkänd") {
-          badge.classList.add("modal-badge-manual-ok");
-          badge.textContent = "Manuellt beslut: Godkänd";
-        } else if (row.decision === "Nekad") {
-          badge.classList.add("modal-badge-manual-nekad");
-          badge.textContent = "Manuellt beslut: Nekad";
-        } else if (row.match === "OK") {
-          badge.classList.add("modal-badge-auto");
-          badge.textContent = "Automatisk match (OK)";
-        } else {
-          badge.classList.add("modal-badge-kolla");
-          badge.textContent = "Avvikelse – ingen automatisk match";
-        }
-
-        badgeHost.appendChild(badge);
-      }
-
-      const lines = [
-        ["ID", row._id ?? ""],
-        ["Orgnr", row.orgnr ?? ""],
-        ["EntityID", row.entityId ?? ""],
-        ["BV: Namn", row.bvName ?? ""],
-        ["Entity: OrgName", row.entityOrgName ?? ""],
-        ["Entity: OrgDispName", row.entityOrgDispName ?? ""],
-        ["Match", row.match ?? ""],
-        ["Decision", row.decision ?? ""],
-        ["DecidedAt", row.decidedAt ?? ""],
+      const parts = [
+        "ID: " + (row._id ?? ""),
+        "Orgnr: " + (row.orgnr ?? ""),
+        "EntityID: " + (row.entityId ?? ""),
+        "BV: Namn: " + (row.bvName ?? ""),
+        "Entity: OrgName: " + (row.entityOrgName ?? ""),
+        "Entity: OrgDispName: " + (row.entityOrgDispName ?? ""),
+        "Match: " + (row.match ?? ""),
+        "Godkänn: " + status,
       ];
 
-      modalContent.innerHTML = "";
-      for (const [label, value] of lines) {
-        const rowEl = document.createElement("div");
-        rowEl.className = "modal-row";
-
-        const labelEl = document.createElement("div");
-        labelEl.className = "modal-row-label";
-        labelEl.textContent = label;
-
-        const valueEl = document.createElement("div");
-        valueEl.className = "modal-row-value";
-        valueEl.textContent = value;
-
-        rowEl.appendChild(labelEl);
-        rowEl.appendChild(valueEl);
-        modalContent.appendChild(rowEl);
-      }
-
-      detailModal.classList.add("show");
-    }
-
-    async function copyModalContents() {
-      if (!currentModalRow) return;
-
-      const r = currentModalRow;
-      const lines = [
-        `ID: ${r._id ?? ""}`,
-        `Orgnr: ${r.orgnr ?? ""}`,
-        `EntityID: ${r.entityId ?? ""}`,
-        `BV: Namn: ${r.bvName ?? ""}`,
-        `Entity: OrgName: ${r.entityOrgName ?? ""}`,
-        `Entity: OrgDispName: ${r.entityOrgDispName ?? ""}`,
-        `Match: ${r.match ?? ""}`,
-        `Decision: ${r.decision ?? ""}`,
-        `DecidedAt: ${r.decidedAt ?? ""}`,
-      ];
-      const text = lines.join("\n");
-
+      const text = parts.join("\n");
       try {
-        if (navigator.clipboard?.writeText) {
+        if (navigator.clipboard && navigator.clipboard.writeText) {
           await navigator.clipboard.writeText(text);
         } else {
           const ta = document.createElement("textarea");
           ta.value = text;
-          ta.style.position = "fixed";
-          ta.style.opacity = "0";
           document.body.appendChild(ta);
           ta.select();
           document.execCommand("copy");
           document.body.removeChild(ta);
         }
-        alert("Innehållet i modalen har kopierats.");
+        copyIndicator.textContent = "Kopierat!";
+        setTimeout(() => {
+          copyIndicator.textContent = "";
+        }, 1500);
       } catch (err) {
-        console.error("Kunde inte kopiera till urklipp", err);
+        console.error(err);
         alert("Kunde inte kopiera till urklipp.");
       }
     }
 
-    function closeModal() {
-      detailModal.classList.remove("show");
-      currentModalRow = null;
-    }
+    // Event-lyssnare
+    searchInput.addEventListener("input", () => renderTable());
+    matchFilter.addEventListener("change", () => renderTable());
+    godkannFilterCheckboxes.forEach((cb) =>
+      cb.addEventListener("change", () => renderTable())
+    );
 
-    syncButton.addEventListener("click", async () => {
-      const ok = window.confirm(
-        "VARNING: Är du säker på att du vill läsa in metadata?\n\n" +
-          "Inläsningen kan ta upp till 20 minuter."
-      );
-      if (!ok) return;
+    tableBody.addEventListener("click", (event) => {
+      const btn = event.target.closest("button");
+      const tr = event.target.closest("tr[data-orgnr]");
+      if (!tr) return;
+      const orgnr = tr.getAttribute("data-orgnr");
+      const row = rowByOrgnr[orgnr];
+      if (!row) return;
 
-      syncButton.disabled = true;
-
-      try {
-        let cursor = null;
-        let totalProcessed = 0;
-        let batch = 0;
-
-        while (true) {
-          batch++;
-          const url =
-            API_BASE +
-            "/sync-metadata" +
-            (cursor ? "?cursor=" + encodeURIComponent(cursor) : "");
-
-          setStatus(
-            `Läser in metadata... (batch ${batch}, totalt ${totalProcessed} uppdateringar)`,
-            "loading"
-          );
-
-          const res = await fetch(url, {
-            method: "POST",
-            headers: { accept: "application/json" },
-          });
-
-          if (!res.ok) {
-            throw new Error("HTTP " + res.status);
+      if (btn) {
+        event.stopPropagation();
+        const action = btn.getAttribute("data-action");
+        if (action === "approve") {
+          const ui = getRowUiState(orgnr);
+          ui.mode = "choose";
+          ui.pendingDecision = "Godkänd";
+          renderTable();
+        } else if (action === "reject") {
+          const ui = getRowUiState(orgnr);
+          ui.mode = "choose";
+          ui.pendingDecision = "Nekad";
+          renderTable();
+        } else if (action === "save") {
+          saveDecision(orgnr);
+        } else if (action === "cancel") {
+          const ui = getRowUiState(orgnr);
+          ui.mode = "idle";
+          ui.pendingDecision = null;
+          renderTable();
+        } else if (action === "change") {
+          if (row.decision) {
+            // Töm beslut i KV och sedan öppna val-läge
+            resetDecision(orgnr).then(() => {
+              const r = rowByOrgnr[orgnr];
+              if (r) {
+                const ui2 = getRowUiState(orgnr);
+                ui2.mode = "choose";
+                ui2.pendingDecision = null;
+                renderTable();
+              }
+            });
+          } else {
+            const ui = getRowUiState(orgnr);
+            ui.mode = "choose";
+            ui.pendingDecision = null;
+            renderTable();
           }
-
-          const data = await res.json();
-          console.log("Sync result", data);
-
-          totalProcessed += data.processed || 0;
-
-          if (data.done || !data.cursor) {
-            break;
-          }
-
-          cursor = data.cursor;
         }
-
-        await fetchTable();
-        setStatus(
-          `Metadata inläst – ${totalProcessed} uppdateringar`,
-          "ok"
-        );
-      } catch (err) {
-        console.error(err);
-        setStatus("Fel vid inläsning av metadata", "error");
-        alert("Kunde inte läsa in metadata. Kontrollera loggarna och försök igen.");
-      } finally {
-        syncButton.disabled = false;
+        return;
       }
+
+      // Klick på rad (inte på knapp) => öppna modal
+      openModalForRow(row);
     });
 
-    matchFilterEl.addEventListener("change", applyFilters);
-    decisionFilterBoxes.forEach((cb) =>
-      cb.addEventListener("change", applyFilters)
-    );
-    exportCsvButton.addEventListener("click", exportFilteredAsCsv);
-    exportJsonButton.addEventListener("click", exportFilteredAsJson);
+    syncBtn.addEventListener("click", syncMetadata);
+    exportCsvBtn.addEventListener("click", exportCsv);
+    exportJsonBtn.addEventListener("click", exportJson);
 
     modalCloseBtn.addEventListener("click", closeModal);
-    modalBackdrop.addEventListener("click", closeModal);
-    modalCopyBtn.addEventListener("click", copyModalContents);
-    document.addEventListener("keydown", (e) => {
-      if (e.key === "Escape") closeModal();
+    modalBackdrop.addEventListener("click", (e) => {
+      if (e.target === modalBackdrop) {
+        closeModal();
+      }
     });
+    copyBtn.addEventListener("click", copyModalContent);
 
+    // Init
     fetchTable();
   })();
 </script>
