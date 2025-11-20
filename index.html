@@ -173,6 +173,11 @@
       background: #f9fafb;
     }
 
+    /* Grupp-visualisering per entityId */
+    tr.group-start td {
+      border-top: 2px solid #cbd5e1;
+    }
+
     td[data-col="bvName"],
     td[data-col="entityOrgName"],
     td[data-col="entityOrgDispName"] {
@@ -365,6 +370,12 @@
       font-weight: 600;
     }
 
+    .modal-header-right {
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+    }
+
     .modal-status-badge {
       font-size: 0.7rem;
     }
@@ -401,6 +412,19 @@
       background: var(--warn-soft);
       color: var(--warn);
       border: 1px solid rgba(220, 38, 38, 0.3);
+    }
+
+    .modal-copy-btn {
+      font-size: 0.7rem;
+      padding: 0.15rem 0.6rem;
+      border-radius: 999px;
+      border: 1px solid #d1d5db;
+      background: #f9fafb;
+      cursor: pointer;
+    }
+
+    .modal-copy-btn:hover {
+      background: #e5e7eb;
     }
 
     .modal-close {
@@ -553,7 +577,12 @@
     <button id="modalClose" class="modal-close" type="button">&times;</button>
     <div class="modal-header-row">
       <div class="modal-title">Detaljer</div>
-      <div id="modalStatusBadge" class="modal-status-badge"></div>
+      <div class="modal-header-right">
+        <div id="modalStatusBadge" class="modal-status-badge"></div>
+        <button id="modalCopyBtn" class="modal-copy-btn" type="button">
+          Kopiera
+        </button>
+      </div>
     </div>
     <div id="modalContent" class="modal-body"></div>
   </div>
@@ -566,6 +595,7 @@
     let allRows = [];
     let filteredRows = [];
     let isLoading = false;
+    let currentModalRow = null;
 
     const matchFilterEl = document.getElementById("matchFilter");
     const decisionFilterBoxes = Array.from(
@@ -582,6 +612,7 @@
     const modalBackdrop = document.getElementById("modalBackdrop");
     const modalCloseBtn = document.getElementById("modalClose");
     const modalContent = document.getElementById("modalContent");
+    const modalCopyBtn = document.getElementById("modalCopyBtn");
 
     function setStatus(text, mode) {
       statusIndicator.innerHTML = "";
@@ -623,9 +654,15 @@
               row.orgnr &&
               !String(row.orgnr).startsWith("__meta__")
           )
-          .sort((a, b) =>
-            String(a.orgnr || "").localeCompare(String(b.orgnr || ""))
-          );
+          // Sortera så att poster med samma entityId hålls ihop
+          .sort((a, b) => {
+            const eA = a.entityId || "";
+            const eB = b.entityId || "";
+            if (eA !== eB) {
+              return String(eA).localeCompare(String(eB));
+            }
+            return String(a.orgnr || "").localeCompare(String(b.orgnr || ""));
+          });
 
         // Tilldela stabilt löpnummer (ID) baserat på sorterad ordning
         allRows.forEach((row, idx) => {
@@ -692,8 +729,17 @@
 
       tableBody.innerHTML = "";
 
+      let prevEntityId = null;
+
       for (const row of filteredRows) {
         const tr = document.createElement("tr");
+
+        const currentEntityId = row.entityId || null;
+        const isNewGroup = currentEntityId !== prevEntityId;
+        if (isNewGroup) {
+          tr.classList.add("group-start");
+        }
+        prevEntityId = currentEntityId;
 
         const tdId = document.createElement("td");
         tdId.textContent = row._id ?? "";
@@ -992,6 +1038,7 @@
 
     function openModal(row) {
       if (!row) return;
+      currentModalRow = row;
 
       const badgeHost = document.getElementById("modalStatusBadge");
       if (badgeHost) {
@@ -1050,8 +1097,46 @@
       detailModal.classList.add("show");
     }
 
+    async function copyModalContents() {
+      if (!currentModalRow) return;
+
+      const r = currentModalRow;
+      const lines = [
+        `ID: ${r._id ?? ""}`,
+        `Orgnr: ${r.orgnr ?? ""}`,
+        `EntityID: ${r.entityId ?? ""}`,
+        `BV: Namn: ${r.bvName ?? ""}`,
+        `Entity: OrgName: ${r.entityOrgName ?? ""}`,
+        `Entity: OrgDispName: ${r.entityOrgDispName ?? ""}`,
+        `Match: ${r.match ?? ""}`,
+        `Decision: ${r.decision ?? ""}`,
+        `DecidedAt: ${r.decidedAt ?? ""}`,
+      ];
+      const text = lines.join("\n");
+
+      try {
+        if (navigator.clipboard?.writeText) {
+          await navigator.clipboard.writeText(text);
+        } else {
+          const ta = document.createElement("textarea");
+          ta.value = text;
+          ta.style.position = "fixed";
+          ta.style.opacity = "0";
+          document.body.appendChild(ta);
+          ta.select();
+          document.execCommand("copy");
+          document.body.removeChild(ta);
+        }
+        alert("Innehållet i modalen har kopierats.");
+      } catch (err) {
+        console.error("Kunde inte kopiera till urklipp", err);
+        alert("Kunde inte kopiera till urklipp.");
+      }
+    }
+
     function closeModal() {
       detailModal.classList.remove("show");
+      currentModalRow = null;
     }
 
     syncButton.addEventListener("click", async () => {
@@ -1124,6 +1209,7 @@
 
     modalCloseBtn.addEventListener("click", closeModal);
     modalBackdrop.addEventListener("click", closeModal);
+    modalCopyBtn.addEventListener("click", copyModalContents);
     document.addEventListener("keydown", (e) => {
       if (e.key === "Escape") closeModal();
     });
