@@ -75,6 +75,28 @@
       margin-bottom: 0.2rem;
     }
 
+    .rules-summary-box {
+      margin-top: 0.4rem;
+      margin-bottom: 0.4rem;
+      padding: 0.5rem 0.7rem;
+      border-radius: 0.6rem;
+      border: 1px dashed #e5e7eb;
+      background: #f9fafb;
+      font-size: 0.78rem;
+      color: var(--muted);
+    }
+
+    .rules-summary-title {
+      font-weight: 600;
+      font-size: 0.78rem;
+      margin-bottom: 0.15rem;
+    }
+
+    .rules-summary-body {
+      line-height: 1.3;
+      white-space: pre-line;
+    }
+
     .rule-block {
       border-radius: 0.75rem;
       border: 1px solid #e5e7eb;
@@ -218,6 +240,11 @@
       color: var(--warn);
     }
 
+    .status-sub {
+      font-size: 0.75rem;
+      color: var(--muted);
+    }
+
     a.link {
       font-size: 0.8rem;
       color: var(--accent);
@@ -242,6 +269,13 @@
     <div class="section-title">Matchningsregler</div>
     <div class="section-subtitle">
       Ändringar påverkar hur statusen <strong>Match (OK/KOLLA)</strong> räknas ut i tabellen.
+    </div>
+
+    <div id="kvRulesSummary" class="rules-summary-box">
+      <div class="rules-summary-title">Aktiva regler (lagrade i KV)</div>
+      <div class="rules-summary-body" id="kvRulesSummaryBody">
+        Läser in regler...
+      </div>
     </div>
 
     <div class="rule-block">
@@ -337,7 +371,7 @@
       </div>
       <div style="display:flex;flex-direction:column;gap:0.15rem;align-items:flex-end;">
         <div id="statusText" class="status-text"></div>
-        <div id="updatedAtText" class="status-text"></div>
+        <div id="updatedAtText" class="status-sub"></div>
         <a href="/" class="link">Tillbaka till tabellen</a>
       </div>
     </div>
@@ -355,6 +389,7 @@
     const statusTextEl = document.getElementById("statusText");
     const updatedAtTextEl = document.getElementById("updatedAtText");
     const saveBtn = document.getElementById("saveBtn");
+    const kvRulesSummaryBody = document.getElementById("kvRulesSummaryBody");
 
     const orgNameSourceRadios = Array.from(
       document.querySelectorAll('input[name="orgNameSource"]')
@@ -376,6 +411,47 @@
         return;
       }
       updatedAtTextEl.textContent = "Senast uppdaterad: " + updatedAt;
+    }
+
+    function describeSource(source, generic) {
+      switch (source) {
+        case "BV":
+          return "BV: NAMN";
+        case "GENERIC":
+          return `Generisk: "${generic || ""}"`;
+        case "CONCAT":
+          return `BV: NAMN + "${generic || ""}"`;
+        default:
+          return source || "okänd";
+      }
+    }
+
+    function describeMatchType(type) {
+      return type === "fuzzy" ? "fuzzy" : "exakt";
+    }
+
+    function renderRulesSummary(rules) {
+      if (!rules) {
+        kvRulesSummaryBody.textContent =
+          "Inga regler sparade – standardregler används (BV: NAMN / exakt + BV: NAMN / fuzzy).";
+        return;
+      }
+
+      const orgName = rules.orgName || {};
+      const orgDisp = rules.orgDispName || {};
+
+      const orgNameSrc = describeSource(orgName.source, orgName.generic);
+      const orgNameMatch = describeMatchType(rules.orgNameMatchType);
+
+      const orgDispSrc = describeSource(orgDisp.source, orgDisp.generic);
+      const orgDispMatch = describeMatchType(rules.orgDispNameMatchType);
+
+      const lines = [
+        `ENTITY: ORGNAME → ${orgNameSrc} (matchning: ${orgNameMatch})`,
+        `ENTITY: ORGDISPNAME → ${orgDispSrc} (matchning: ${orgDispMatch})`,
+      ];
+
+      kvRulesSummaryBody.textContent = lines.join("\n");
     }
 
     function getSelectedRadioValue(radios) {
@@ -420,21 +496,13 @@
         const rules = data.rules || {};
 
         // OrgName
-        setRadioGroup(
-          orgNameSourceRadios,
-          rules.orgName?.source,
-          "BV"
-        );
+        setRadioGroup(orgNameSourceRadios, rules.orgName?.source, "BV");
         orgNameGenericInput.value = rules.orgName?.generic || "";
         orgNameMatchTypeSelect.value =
           rules.orgNameMatchType === "fuzzy" ? "fuzzy" : "exact";
 
         // OrgDispName
-        setRadioGroup(
-          orgDispSourceRadios,
-          rules.orgDispName?.source,
-          "BV"
-        );
+        setRadioGroup(orgDispSourceRadios, rules.orgDispName?.source, "BV");
         orgDispGenericInput.value = rules.orgDispName?.generic || "";
         orgDispMatchTypeSelect.value =
           rules.orgDispNameMatchType === "exact" ? "exact" : "fuzzy";
@@ -442,10 +510,12 @@
         updateGenericEnabled();
         setStatus("Regler inlästa.", "ok");
         setUpdatedAt(rules.updatedAt || null);
+        renderRulesSummary(rules);
       } catch (err) {
         console.error(err);
         setStatus("Kunde inte läsa in regler. Kontrollera loggarna.", "error");
         setUpdatedAt(null);
+        renderRulesSummary(null);
       }
     }
 
@@ -456,7 +526,8 @@
       const payload = {
         orgNameSource,
         orgNameGeneric: orgNameGenericInput.value || "",
-        orgNameMatchType: orgNameMatchTypeSelect.value === "fuzzy" ? "fuzzy" : "exact",
+        orgNameMatchType:
+          orgNameMatchTypeSelect.value === "fuzzy" ? "fuzzy" : "exact",
         orgDispSource,
         orgDispGeneric: orgDispGenericInput.value || "",
         orgDispMatchType:
@@ -482,9 +553,10 @@
 
         setStatus("Regler sparade.", "ok");
         setUpdatedAt(rules.updatedAt || null);
+        renderRulesSummary(rules);
       } catch (err) {
         console.error(err);
-        setStatus("Kunde inte spara regler. Kontrollera loggarna.", "error");
+        setStatus("Kunde inte sara regler. Kontrollera loggarna.", "error");
       } finally {
         saveBtn.disabled = false;
       }
