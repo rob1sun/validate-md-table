@@ -143,16 +143,17 @@
     }
 
     .rules-hint {
-  font-size: 0.75rem;
-  color: #6b7280;
-  text-align: right;
-  max-width: 100%;
-  margin-left: auto;
-  margin-top: 0.15rem;
-  white-space: normal;   /* tillåt radbrytning */
-  overflow: visible;     /* inget klipp */
-}
-
+      font-size: 0.75rem;
+      color: #6b7280;
+      text-align: right;
+      max-width: 100%;
+      margin-left: auto;
+      margin-top: 0.15rem;
+      white-space: normal;   /* tillåt radbrytning */
+      overflow: visible;     /* inget klipp */
+      line-height: 1.3;
+      opacity: 0.9;
+    }
 
     .card {
       background: var(--card-bg);
@@ -173,7 +174,7 @@
       top: 0;
       z-index: 10;
       background: var(--card-bg);
-      padding-bottom: 0.4rem; 
+      padding-bottom: 0.4rem;
     }
 
     .filter-group {
@@ -260,7 +261,7 @@
       text-align: left;
       overflow: hidden;
       text-overflow: ellipsis;
-      /*white-space: nowrap;*/
+      /*white-space: nowrap;*/ /* din ändring – lämnas kommenterad */
     }
 
     th {
@@ -290,7 +291,7 @@
     }
 
     td.actions-col {
-      width: 200px;
+      width: 220px;
       text-align: right;
     }
 
@@ -352,6 +353,13 @@
       background: linear-gradient(to right, #f9fafb, #ffffff);
     }
 
+    /* Mismatch-cell (fältet matchar inte villkoret) */
+    .mismatch-cell {
+      color: #b91c1c;
+      background: #fef2f2;
+      font-weight: 500;
+    }
+
     /* Modal */
     .modal-backdrop {
       position: fixed;
@@ -403,7 +411,7 @@
     }
 
     .modal-label {
-      width: 110px;
+      width: 130px;
       color: var(--muted);
       flex-shrink: 0;
     }
@@ -622,6 +630,7 @@
     let rowByOrgnr = {};
     let uiRowState = {}; // orgnr -> { mode: 'idle' | 'choose', pendingDecision: 'Godkänd'|'Nekad'|null }
     let selectedRowForModal = null;
+    let currentRules = null; // aktiva regler från API:t
 
     function setTableStatus(msg) {
       tableStatus.textContent = msg || "";
@@ -670,7 +679,8 @@
         orgDisp.generic
       )}/${describeMatchShort(activeRules.orgDispNameMatchType)}`;
 
-      activeRulesHintEl.textContent = `Regler: OrgName = ${orgNameText}, OrgDispName = ${orgDispText}`;
+      activeRulesHintEl.textContent =
+        `Regler: OrgName = ${orgNameText}, OrgDispName = ${orgDispText}`;
     }
 
     function normalizeStr(str) {
@@ -749,7 +759,6 @@
       const match = row.match === "OK" ? "OK" : "KOLLA";
 
       if (ui.mode === "choose") {
-        // Vi har ett val som väntar på SPARA/ÅNGRA
         const label = ui.pendingDecision === "Nekad" ? "Neka" : "Godkänn";
         return (
           '<span style="margin-right:0.4rem;font-size:0.75rem;">Val: ' +
@@ -764,7 +773,6 @@
         );
       }
 
-      // Idle-läge
       if (row.decision === "Godkänd") {
         return (
           '<span style="margin-right:0.4rem;">Godkänd</span>' +
@@ -784,7 +792,6 @@
       }
 
       if (match === "OK") {
-        // Automatisk match, men man ska kunna ändra
         return (
           '<span style="margin-right:0.4rem;">Match</span>' +
           '<button class="btn btn-small" data-action="change" data-orgnr="' +
@@ -793,7 +800,6 @@
         );
       }
 
-      // match = KOLLA, inget beslut => visa GODKÄNN/NEKA
       return (
         '<button class="btn btn-small btn-ok" data-action="approve" data-orgnr="' +
         row.orgnr +
@@ -802,6 +808,128 @@
         row.orgnr +
         '">NEKA</button>'
       );
+    }
+
+    /* === Frontend-kopia av matchningslogik för att kunna markera fel fält === */
+
+    function getDefaultRules() {
+      return {
+        orgName: { source: "BV", generic: "" },
+        orgDispName: { source: "BV", generic: "" },
+        orgNameMatchType: "exact",
+        orgDispNameMatchType: "fuzzy",
+      };
+    }
+
+    function normalizeExactName(str) {
+      if (!str) return "";
+      return String(str)
+        .normalize("NFKC")
+        .replace(/\s+/g, " ")
+        .trim()
+        .toUpperCase();
+    }
+
+    function canonicalTokens(str) {
+      if (!str) return [];
+      const normalized = normalizeExactName(str)
+        .replace(/Å/g, "A")
+        .replace(/Ä/g, "A")
+        .replace(/Ö/g, "O");
+
+      const rawTokens = normalized.split(" ").filter(Boolean);
+
+      const ignoreTokens = new Set([
+        "AB",
+        "AKTIEBOLAG",
+        "KB",
+        "HB",
+        "EK",
+        "EKONOMISK",
+        "FORENING",
+        "FÖRENING",
+        "FÖRBUND",
+        "FORBUND",
+        "KOMMUN",
+        "KOMMUNER",
+        "REGION",
+        "STIFTELSE",
+        "ENHET",
+        "BOLAG",
+        "AKTIEBOLAGET",
+        "OCH",
+        "FÖR",
+        "FOR",
+        "I",
+        "AV",
+        "THE",
+      ]);
+
+      const tokens = [];
+      for (const t of rawTokens) {
+        if (!t) continue;
+        if (ignoreTokens.has(t)) continue;
+        tokens.push(t);
+      }
+      return tokens;
+    }
+
+    function fuzzyContains(actual, target) {
+      const actualTokens = canonicalTokens(actual);
+      const targetTokens = canonicalTokens(target);
+      if (!actualTokens.length || !targetTokens.length) return false;
+      const actualSet = new Set(actualTokens);
+      return targetTokens.every((t) => actualSet.has(t));
+    }
+
+    function buildTargetFromRuleFront(rule, bvValue) {
+      if (!rule) return null;
+      const generic = rule.generic || "";
+      switch (rule.source) {
+        case "GENERIC":
+          return generic || null;
+        case "CONCAT":
+          if (!bvValue && !generic) return null;
+          return String(bvValue || "") + String(generic || "");
+        case "BV":
+        default:
+          return bvValue || null;
+      }
+    }
+
+    function matchFieldFront(actual, target, type) {
+      if (!actual || !target) return false;
+      if (type === "exact") {
+        return normalizeExactName(actual) === normalizeExactName(target);
+      }
+      return fuzzyContains(actual, target);
+    }
+
+    // Returnerar { orgNameOk, orgDispOk, targetOrgName, targetOrgDisp }
+    function computeFieldMatchesForRow(row) {
+      const rules = currentRules || getDefaultRules();
+      const bvName = row.bvName;
+      const orgName = row.entityOrgName;
+      const orgDispName = row.entityOrgDispName;
+
+      const targetOrgName = buildTargetFromRuleFront(rules.orgName, bvName);
+      const targetOrgDisp = buildTargetFromRuleFront(
+        rules.orgDispName,
+        bvName
+      );
+
+      const orgNameOk = matchFieldFront(
+        orgName,
+        targetOrgName,
+        rules.orgNameMatchType
+      );
+      const orgDispOk = matchFieldFront(
+        orgDispName,
+        targetOrgDisp,
+        rules.orgDispNameMatchType
+      );
+
+      return { orgNameOk, orgDispOk, targetOrgName, targetOrgDisp };
     }
 
     function renderTable() {
@@ -833,6 +961,12 @@
         const escapedOrgName = row.entityOrgName ?? "";
         const escapedOrgDisp = row.entityOrgDispName ?? "";
 
+        const fm = computeFieldMatchesForRow(row);
+        const orgNameClass =
+          fm && !fm.orgNameOk ? ' class="mismatch-cell"' : "";
+        const orgDispClass =
+          fm && !fm.orgDispOk ? ' class="mismatch-cell"' : "";
+
         html +=
           '<tr class="' +
           trClass +
@@ -848,10 +982,14 @@
           "<td>" +
           escapedBvName +
           "</td>" +
-          "<td>" +
+          "<td" +
+          orgNameClass +
+          ">" +
           escapedOrgName +
           "</td>" +
-          "<td>" +
+          "<td" +
+          orgDispClass +
+          ">" +
           escapedOrgDisp +
           "</td>" +
           "<td>" +
@@ -878,8 +1016,8 @@
         const activeRules = data.activeRules;
 
         updateActiveRulesHint(activeRules);
+        currentRules = activeRules || null;
 
-        // sortera per entityId + orgnr
         rows.sort((a, b) => {
           const aId = a.entityId || "";
           const bId = b.entityId || "";
@@ -892,7 +1030,6 @@
           return (a.orgnr || "").localeCompare(b.orgnr || "");
         });
 
-        // Tilldela löpnummer ID (stabilt tills nästa KV-uppdatering)
         rows.forEach((row, index) => {
           row._id = index + 1;
         });
@@ -972,7 +1109,6 @@
         setSyncStatus(
           "Inläsning klar. Totalt bearbetade poster: " + totalProcessed + "."
         );
-        // Läs om tabellen efter lyckad inläsning
         await fetchTable();
       } catch (err) {
         console.error(err);
@@ -1123,11 +1259,25 @@
       }
     }
 
+    function modalRowHtml(label, value) {
+      return (
+        '<div class="modal-row">' +
+        '<div class="modal-label">' +
+        label +
+        "</div>" +
+        '<div class="modal-value">' +
+        (value || "") +
+        "</div>" +
+        "</div>"
+      );
+    }
+
     function openModalForRow(row) {
       selectedRowForModal = row;
       if (!row) return;
 
       const status = computeGodkannStatus(row);
+      const fm = computeFieldMatchesForRow(row);
 
       let badgeHtml = "";
       const matchBadge = badgeHtmlForMatch(row.match);
@@ -1148,16 +1298,34 @@
       badgeHtml = matchBadge + statusBadge;
       modalBadgeContainer.innerHTML = badgeHtml;
 
+      const rules = currentRules || getDefaultRules();
+      const targetOrgName = fm.targetOrgName || "";
+      const targetOrgDisp = fm.targetOrgDisp || "";
+
       const lines = [];
       lines.push(modalRowHtml("ID", row._id ?? ""));
       lines.push(modalRowHtml("Orgnr", row.orgnr ?? ""));
       lines.push(modalRowHtml("EntityID", row.entityId ?? ""));
       lines.push(modalRowHtml("BV: Namn", row.bvName ?? ""));
+      lines.push(modalRowHtml("Entity: OrgName", row.entityOrgName ?? ""));
       lines.push(
-        modalRowHtml("Entity: OrgName", row.entityOrgName ?? "")
+        modalRowHtml(
+          "Mål OrgName",
+          targetOrgName
+            ? `${targetOrgName} (källa: ${rules.orgName?.source || "BV"}, ${rules.orgNameMatchType || "exact"})`
+            : ""
+        )
       );
       lines.push(
         modalRowHtml("Entity: OrgDispName", row.entityOrgDispName ?? "")
+      );
+      lines.push(
+        modalRowHtml(
+          "Mål OrgDispName",
+          targetOrgDisp
+            ? `${targetOrgDisp} (källa: ${rules.orgDispName?.source || "BV"}, ${rules.orgDispNameMatchType || "fuzzy"})`
+            : ""
+        )
       );
       lines.push(modalRowHtml("Match", row.match ?? ""));
       lines.push(modalRowHtml("Godkänn", status));
@@ -1165,19 +1333,6 @@
       modalBody.innerHTML = lines.join("");
       copyIndicator.textContent = "";
       modalBackdrop.classList.add("show");
-    }
-
-    function modalRowHtml(label, value) {
-      return (
-        '<div class="modal-row">' +
-        '<div class="modal-label">' +
-        label +
-        "</div>" +
-        '<div class="modal-value">' +
-        (value || "") +
-        "</div>" +
-        "</div>"
-      );
     }
 
     function closeModal() {
@@ -1189,6 +1344,11 @@
       if (!selectedRowForModal) return;
       const row = selectedRowForModal;
       const status = computeGodkannStatus(row);
+      const fm = computeFieldMatchesForRow(row);
+      const rules = currentRules || getDefaultRules();
+
+      const targetOrgName = fm.targetOrgName || "";
+      const targetOrgDisp = fm.targetOrgDisp || "";
 
       const parts = [
         "ID: " + (row._id ?? ""),
@@ -1196,10 +1356,20 @@
         "EntityID: " + (row.entityId ?? ""),
         "BV: Namn: " + (row.bvName ?? ""),
         "Entity: OrgName: " + (row.entityOrgName ?? ""),
+        targetOrgName
+          ? `Mål OrgName: ${targetOrgName} (källa: ${
+              rules.orgName?.source || "BV"
+            }, ${rules.orgNameMatchType || "exact"})`
+          : "",
         "Entity: OrgDispName: " + (row.entityOrgDispName ?? ""),
+        targetOrgDisp
+          ? `Mål OrgDispName: ${targetOrgDisp} (källa: ${
+              rules.orgDispName?.source || "BV"
+            }, ${rules.orgDispNameMatchType || "fuzzy"})`
+          : "",
         "Match: " + (row.match ?? ""),
         "Godkänn: " + status,
-      ];
+      ].filter(Boolean);
 
       const text = parts.join("\n");
       try {
@@ -1260,7 +1430,6 @@
           renderTable();
         } else if (action === "change") {
           if (row.decision) {
-            // Töm beslut i KV och sedan öppna val-läge
             resetDecision(orgnr).then(() => {
               const r = rowByOrgnr[orgnr];
               if (r) {
@@ -1280,7 +1449,6 @@
         return;
       }
 
-      // Klick på rad (inte på knapp) => öppna modal
       openModalForRow(row);
     });
 
