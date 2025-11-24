@@ -967,10 +967,14 @@
         const escapedOrgDisp = row.entityOrgDispName ?? "";
 
         const fm = computeFieldMatchesForRow(row);
-        const orgNameClass =
-          fm && !fm.orgNameOk ? ' class="mismatch-cell"' : "";
-        const orgDispClass =
-          fm && !fm.orgDispOk ? ' class="mismatch-cell"' : "";
+const isOverallOk = row.match === "OK";
+
+const orgNameClass =
+  !isOverallOk && fm && !fm.orgNameOk ? ' class="mismatch-cell"' : "";
+
+const orgDispClass =
+  !isOverallOk && fm && !fm.orgDispOk ? ' class="mismatch-cell"' : "";
+
 
         html +=
           '<tr class="' +
