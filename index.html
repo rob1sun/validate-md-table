@@ -1020,8 +1020,27 @@
         const rows = Array.isArray(data.rows) ? data.rows : [];
         const activeRules = data.activeRules;
 
-        updateActiveRulesHint(activeRules);
-        currentRules = activeRules || null;
+        const lastImport = data.lastImport;
+
+// Visa regler som idag
+updateActiveRulesHint(activeRules);
+currentRules = activeRules || null;
+
+// Visa “gamla detaljerade” statusen om det finns meta
+if (lastImport && lastImport.at) {
+  const dt = new Date(lastImport.at);
+  const formatted = dt.toLocaleString("sv-SE", {
+    dateStyle: "short",
+    timeStyle: "short",
+  });
+  const processed = lastImport.processed ?? "?";
+  setSyncStatus(
+    `Senaste inläsning: ${formatted}, bearbetade ${processed} poster.`
+  );
+} else {
+  setSyncStatus("Ingen metadata-inläsning registrerad ännu.");
+}
+
 
         rows.sort((a, b) => {
           const aId = a.entityId || "";
