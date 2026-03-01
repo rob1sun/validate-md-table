@@ -447,6 +447,23 @@
       }
     }
 
+   async function runSyncMetadata() {
+      if (!confirm("Börja synka metadata? Detta bygger tabellen och kan ta en liten stund.")) return;
+      syncBtn.disabled = true;
+      document.getElementById("syncStatus").textContent = "Synkar batchar...";
+      try {
+        const res = await fetch(`${API_BASE}/sync-metadata`, { method: "POST" });
+        if (!res.ok) throw new Error("Något gick fel");
+        await res.json();
+        document.getElementById("syncStatus").textContent = "Synk klar!";
+        fetchTable(currentBatchId); // Laddar om tabellen så du ser resultatet
+      } catch (e) {
+        document.getElementById("syncStatus").textContent = "Synk misslyckades.";
+      } finally {
+        syncBtn.disabled = false;
+      }
+    } 
+
     // ----- EVENTS ----- //
     batchSelect.addEventListener("change", (e) => {
       if (Object.keys(unsavedChanges).length > 0) {
@@ -463,6 +480,7 @@
     godkannFilterCheckboxes.forEach((cb) => cb.addEventListener("change", renderTable));
     saveBatchBtn.addEventListener("click", saveBatch);
     exportCsvBtn.addEventListener("click", exportCsv);
+    syncBtn.addEventListener("click", runSyncMetadata);
 
     modalCloseBtn.addEventListener("click", () => modalBackdrop.classList.remove("show"));
     modalBackdrop.addEventListener("click", (e) => { if (e.target === modalBackdrop) modalBackdrop.classList.remove("show"); });
