@@ -38,6 +38,10 @@
     tbody tr:hover td {background:#f9fafb}
     td.id-col {text-align:right;color:var(--muted);font-variant-numeric:tabular-nums;}
     
+    /* NYTT: Styling för orgnr-länken */
+    .org-link {color: var(--accent); text-decoration: none; font-weight: 600; display: inline-block;}
+    .org-link:hover {text-decoration: underline; color: #1d4ed8;}
+
     .badge {display:inline-flex;align-items:center;justify-content:center;padding:.05rem .4rem;border-radius:999px;font-size:.7rem;font-weight:500}
     .badge-ok {background:var(--ok-bg);color:var(--ok);border:1px solid #bbf7d0}
     .badge-warn {background:var(--warn-bg);color:var(--warn);border:1px solid #fecaca}
@@ -177,7 +181,7 @@
     const modalCloseBtn = document.getElementById("modalCloseBtn");
     
     let currentRows = [];
-    let activeRules = {}; // Sparar reglerna för att visa i modalen
+    let activeRules = {}; 
     let unsavedChanges = {}; 
     let uiRowState = {}; 
     let currentBatchId = "1";
@@ -270,10 +274,13 @@
         const sniStr = (row.sniCodes || []).join(", ");
         const formStr = row.formKod ? `[${row.formKod}]` : "";
         const verksamhetHtml = `<div style="font-size:0.7rem;" title="${sniStr}">${formStr} ${sniStr.substring(0, 15)}...</div>`;
+        
+        // NYTT: Orgnr som länk
+        const orgLinkHtml = `<a href="https://www.allabolag.se/bransch-s%C3%B6k?q=${row.orgnr}" target="_blank" class="org-link">${row.orgnr}</a>`;
 
         html += `<tr class="${trClass}" data-orgnr="${row.orgnr}">
           <td class="id-col">${row._id}</td>
-          <td>${row.orgnr}</td>
+          <td>${orgLinkHtml}</td>
           <td>${row.bvName}</td>
           <td ${orgNameClass}>${row.entityOrgName}</td>
           <td ${dispNameClass}>${row.entityOrgDispName}</td>
@@ -326,7 +333,7 @@
       
       lines.push(`<div class="modal-section-title">Verksamhet (SNI & Form)</div>`);
       lines.push(modalRowHtml("Organisationens Form", row.formKod));
-      lines.push(modalRowHtml("Vitlistade Former", allForms || "(Inga krav)"));
+      lines.push(modalRowHtml("Vitlistade Former", allForms || "(Inga krav)")); // Ändrad till Vitlistade
       lines.push(modalRowHtml("Organisationens SNI", (row.sniCodes || []).join(", ")));
       lines.push(modalRowHtml("Tillåtna SNI-prefix", reqSni || "(Inga krav)"));
 
@@ -336,7 +343,6 @@
 
     // ----- EXPORT CSV ----- //
     function buildCsv(rows) {
-      // Vi använder semikolon och en UTF-8 BOM för att Excel ska gilla åäö
       const header = ["ID", "Orgnr", "BV_Namn", "Entity_OrgName", "Entity_OrgDispName", "Juridisk_Form", "SNI_Koder", "Match_Status", "Beslut"];
       const lines = [header.join(";")];
 
@@ -361,7 +367,7 @@
         });
         lines.push(escaped.join(";"));
       }
-      return "\uFEFF" + lines.join("\r\n"); // \uFEFF är UTF-8 BOM
+      return "\uFEFF" + lines.join("\r\n"); 
     }
 
     function exportCsv() {
@@ -394,16 +400,13 @@
         unsavedChanges = {}; 
         uiRowState = {};
         
-        // Tilldela ID 
         currentRows.sort((a, b) => (a.orgnr || "").localeCompare(b.orgnr || ""));
         currentRows.forEach((row, index) => { row._id = index + 1; });
         
-        // Fyll Dropdown
         const total = data.totalBatches || 1;
         if (batchSelect.options.length === 1 && batchSelect.options[0].value === "1") {
           batchSelect.innerHTML = "";
           for(let i=1; i<=total; i++) batchSelect.innerHTML += `<option value="${i}">Batch ${i}</option>`;
-          // LÄGG TILL "ALLA"
           if(total > 1) batchSelect.innerHTML += `<option value="ALL">Alla batchar (Fullständig lista)</option>`;
         }
         batchSelect.value = currentBatchId;
@@ -457,6 +460,12 @@
     modalBackdrop.addEventListener("click", (e) => { if (e.target === modalBackdrop) modalBackdrop.classList.remove("show"); });
 
     tableBody.addEventListener("click", (e) => {
+      // NYTT: Om klicket är på orgnr-länken, låt webbläsaren hantera det och avbryt modal-öppningen
+      if (e.target.closest(".org-link")) {
+        e.stopPropagation();
+        return;
+      }
+
       const btn = e.target.closest("button");
       const tr = e.target.closest("tr[data-orgnr]");
       if (!tr) return;
