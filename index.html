@@ -5,8 +5,61 @@
   <title>BV / Metadata – validering</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <style>
-    /* CSS förkortad men design bibehållen */
-    :root{--bg:#f5f5f7;--card-bg:#ffffff;--border:#e5e7eb;--border-strong:#94a3b8;--text:#111827;--muted:#6b7280;--accent:#2563eb;--ok:#15803d;--ok-bg:#dcfce7;--warn:#b91c1c;--warn-bg:#fee2e2;--unsaved-bg:#fef08a;--chip-bg:#f3f4f6;--chip-border:#d1d5db}*{box-sizing:border-box}body{margin:0;font-family:system-ui,-apple-system,sans-serif;background:radial-gradient(circle at top,#eef2ff 0,#f5f5f7 45%,#f5f5f7 100%);color:var(--text)}.page{max-width:1400px;margin:0 auto;padding:1.5rem 1rem 2rem}.page-header{display:flex;flex-direction:column;gap:.5rem;margin-bottom:.6rem}.header-top-row{display:flex;align-items:center;justify-content:space-between;gap:.75rem;flex-wrap:wrap}h1{margin:0;font-size:1.3rem}.header-actions{display:flex;flex-wrap:wrap;align-items:center;gap:.4rem}.btn{display:inline-flex;align-items:center;justify-content:center;border-radius:999px;border:1px solid var(--chip-border);font-size:.8rem;padding:.25rem .75rem;cursor:pointer;background:#f9fafb;color:var(--text);white-space:nowrap}.btn-primary{background:var(--accent);color:#ffffff;border-color:var(--accent)}.btn-primary:hover{background:#1d4ed8}.btn-ghost{background:transparent}.btn-small{font-size:.75rem;padding:.15rem .55rem}.btn-ok{background:var(--ok-bg);color:var(--ok);border-color:#bbf7d0}.btn-warn{background:var(--warn-bg);color:var(--warn);border-color:#fecaca}.btn:disabled{opacity:.6;cursor:default}.card{background:var(--card-bg);border-radius:1rem;border:1px solid rgba(15,23,42,.06);box-shadow:0 12px 30px rgba(15,23,42,.06);padding:.8rem .8rem .9rem}.filter-row{display:flex;flex-wrap:wrap;align-items:center;gap:.6rem;margin-bottom:.6rem;position:sticky;top:0;z-index:10;background:var(--card-bg);padding-bottom:.4rem;border-bottom:1px solid var(--border)}.filter-group{display:flex;flex-direction:column;gap:.2rem;font-size:.76rem}.filter-label{color:var(--muted);font-weight:600}input[type="text"],select{font-size:.8rem;padding:.25rem .4rem;border-radius:.5rem;border:1px solid var(--border)}.table-wrapper{border-radius:.75rem;border:1px solid var(--border);overflow-x:auto;background:#ffffff}table{width:100%;border-collapse:collapse;font-size:.8rem;table-layout:fixed}thead{background:#f9fafb}th,td{padding:.35rem .4rem;border-bottom:1px solid #e5e7eb;vertical-align:middle;text-align:left;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}th{font-weight:600;color:#4b5563;font-size:.78rem}tbody tr:hover td{background:#f9fafb}.badge{display:inline-flex;align-items:center;justify-content:center;padding:.05rem .4rem;border-radius:999px;font-size:.7rem;font-weight:500}.badge-ok{background:var(--ok-bg);color:var(--ok);border:1px solid #bbf7d0}.badge-warn{background:var(--warn-bg);color:var(--warn);border:1px solid #fecaca}.badge-neutral{background:#e5e7eb;color:#374151;border:1px solid #d1d5db}.unsaved-row td { background-color: var(--unsaved-bg) !important; }.mismatch-cell{color:#b91c1c;background:#fef2f2;font-weight:500}.status-text{font-size:.75rem;color:var(--muted)}.save-bar{background:#eef2ff;border:1px solid #c7d2fe;padding:0.5rem 1rem;border-radius:0.5rem;display:flex;justify-content:space-between;align-items:center;margin-bottom:0.8rem;display:none;}
+    :root {--bg:#f5f5f7;--card-bg:#ffffff;--border:#e5e7eb;--border-strong:#94a3b8;--text:#111827;--muted:#6b7280;--accent:#2563eb;--ok:#15803d;--ok-bg:#dcfce7;--warn:#b91c1c;--warn-bg:#fee2e2;--unsaved-bg:#fef08a;--chip-bg:#f3f4f6;--chip-border:#d1d5db}
+    * {box-sizing:border-box}
+    body {margin:0;font-family:system-ui,-apple-system,sans-serif;background:radial-gradient(circle at top,#eef2ff 0,#f5f5f7 45%,#f5f5f7 100%);color:var(--text)}
+    .page {max-width:1400px;margin:0 auto;padding:1.5rem 1rem 2rem}
+    .page-header {display:flex;flex-direction:column;gap:.5rem;margin-bottom:.6rem}
+    .header-top-row {display:flex;align-items:center;justify-content:space-between;gap:.75rem;flex-wrap:wrap}
+    h1 {margin:0;font-size:1.3rem}
+    .header-actions {display:flex;flex-wrap:wrap;align-items:center;gap:.4rem}
+    .btn {display:inline-flex;align-items:center;justify-content:center;border-radius:999px;border:1px solid var(--chip-border);font-size:.8rem;padding:.25rem .75rem;cursor:pointer;background:#f9fafb;color:var(--text);white-space:nowrap}
+    .btn-primary {background:var(--accent);color:#ffffff;border-color:var(--accent)}
+    .btn-primary:hover {background:#1d4ed8}
+    .btn-ghost {background:transparent}
+    .btn-small {font-size:.75rem;padding:.15rem .55rem}
+    .btn-ok {background:var(--ok-bg);color:var(--ok);border-color:#bbf7d0}
+    .btn-warn {background:var(--warn-bg);color:var(--warn);border-color:#fecaca}
+    .btn:disabled {opacity:.6;cursor:default}
+    .card {background:var(--card-bg);border-radius:1rem;border:1px solid rgba(15,23,42,.06);box-shadow:0 12px 30px rgba(15,23,42,.06);padding:.8rem .8rem .9rem}
+    .filter-row {display:flex;flex-wrap:wrap;align-items:center;gap:.6rem;margin-bottom:.6rem;position:sticky;top:0;z-index:10;background:var(--card-bg);padding-bottom:.4rem;border-bottom:1px solid var(--border)}
+    .filter-group {display:flex;flex-direction:column;gap:.2rem;font-size:.76rem}
+    .filter-label {color:var(--muted);font-weight:600}
+    input[type="text"],select {font-size:.8rem;padding:.25rem .4rem;border-radius:.5rem;border:1px solid var(--border)}
+    .chip-check {display:inline-flex;align-items:center;gap:.25rem;padding:.12rem .5rem;border-radius:999px;border:1px solid var(--chip-border);background:var(--chip-bg);cursor:pointer;font-size:.75rem;}
+    .chip-check input[type="checkbox"] {margin:0;}
+    
+    .table-wrapper {border-radius:.75rem;border:1px solid var(--border);overflow-x:auto;background:#ffffff}
+    table {width:100%;border-collapse:collapse;font-size:.8rem;table-layout:fixed}
+    thead {background:#f9fafb}
+    /* FIX: Borttagen white-space nowrap för radbrytning */
+    th, td {padding:.35rem .4rem;border-bottom:1px solid #e5e7eb;vertical-align:middle;text-align:left;word-break:break-word;}
+    th {font-weight:600;color:#4b5563;font-size:.78rem}
+    tbody tr {cursor:pointer;}
+    tbody tr:hover td {background:#f9fafb}
+    td.id-col {text-align:right;color:var(--muted);font-variant-numeric:tabular-nums;}
+    
+    .badge {display:inline-flex;align-items:center;justify-content:center;padding:.05rem .4rem;border-radius:999px;font-size:.7rem;font-weight:500}
+    .badge-ok {background:var(--ok-bg);color:var(--ok);border:1px solid #bbf7d0}
+    .badge-warn {background:var(--warn-bg);color:var(--warn);border:1px solid #fecaca}
+    .badge-neutral {background:#e5e7eb;color:#374151;border:1px solid #d1d5db}
+    
+    .unsaved-row td { background-color: var(--unsaved-bg) !important; }
+    .mismatch-cell {color:#b91c1c;background:#fef2f2;font-weight:500}
+    .status-text {font-size:.75rem;color:var(--muted)}
+    .save-bar {background:#eef2ff;border:1px solid #c7d2fe;padding:0.5rem 1rem;border-radius:0.5rem;display:flex;justify-content:space-between;align-items:center;margin-bottom:0.8rem;display:none;}
+    
+    /* MODAL CSS */
+    .modal-backdrop {position:fixed;inset:0;background:rgba(15,23,42,.35);display:none;align-items:center;justify-content:center;z-index:30;}
+    .modal-backdrop.show {display:flex;}
+    .modal {background:#ffffff;border-radius:.9rem;padding:.9rem 1rem;max-width:520px;width:100%;box-shadow:0 18px 40px rgba(15,23,42,.35);font-size:.8rem;}
+    .modal-header {display:flex;align-items:center;justify-content:space-between;margin-bottom:.4rem;}
+    .modal-title {font-weight:600;font-size:.9rem;}
+    .modal-body {display:flex;flex-direction:column;gap:.25rem;margin-bottom:.6rem;max-height:60vh;overflow-y:auto;}
+    .modal-row {display:flex;gap:.4rem;}
+    .modal-label {width:130px;color:var(--muted);flex-shrink:0;}
+    .modal-value {flex:1;word-break:break-word;}
+    .modal-footer {display:flex;justify-content:flex-end;gap:.4rem;align-items:center;}
   </style>
 </head>
 <body>
@@ -45,6 +98,16 @@
         </select>
       </div>
 
+      <div class="filter-group">
+        <div class="filter-label">Godkänn-filter</div>
+        <div style="display:flex; gap:0.3rem; flex-wrap:wrap;">
+          <label class="chip-check"><input type="checkbox" class="godkann-filter" value="Match" checked /><span>Match</span></label>
+          <label class="chip-check"><input type="checkbox" class="godkann-filter" value="Godkänd" checked /><span>Godkänd</span></label>
+          <label class="chip-check"><input type="checkbox" class="godkann-filter" value="Nekad" checked /><span>Nekad</span></label>
+          <label class="chip-check"><input type="checkbox" class="godkann-filter" value="Ej beslutad" checked /><span>Ej beslutad</span></label>
+        </div>
+      </div>
+
       <div class="filter-group" style="margin-left:auto;">
         <div class="filter-label">Status</div>
         <span id="rowCounter" style="font-size:0.75rem;">Visar 0 poster</span>
@@ -60,13 +123,14 @@
       <table>
         <thead>
         <tr>
+          <th style="width:44px;text-align:right;">ID</th>
           <th style="width:100px;">Orgnr</th>
           <th style="width:200px;">BV: Namn</th>
-          <th style="width:200px;">Entity: OrgName</th>
-          <th style="width:200px;">Entity: OrgDispName</th>
-          <th style="width:90px;">Form & SNI</th>
+          <th style="width:180px;">Entity: OrgName</th>
+          <th style="width:180px;">Entity: OrgDispName</th>
+          <th style="width:110px;">Form & SNI</th>
           <th style="width:70px;">Match</th>
-          <th style="width:180px;text-align:right;">Beslut</th>
+          <th style="width:190px;text-align:right;">Beslut</th>
         </tr>
         </thead>
         <tbody id="tableBody"></tbody>
@@ -80,6 +144,19 @@
   </section>
 </div>
 
+<div id="modalBackdrop" class="modal-backdrop">
+  <div class="modal">
+    <div class="modal-header">
+      <div>
+        <div class="modal-title">Detaljer för rad</div>
+        <div id="modalBadgeContainer"></div>
+      </div>
+      <button id="modalCloseBtn" class="btn btn-ghost btn-small" type="button">Stäng</button>
+    </div>
+    <div class="modal-body" id="modalBody"></div>
+  </div>
+</div>
+
 <script>
   (function () {
     const API_BASE = "/api";
@@ -87,60 +164,97 @@
     const batchSelect = document.getElementById("batchSelect");
     const searchInput = document.getElementById("searchInput");
     const matchFilter = document.getElementById("matchFilter");
+    const godkannFilterCheckboxes = Array.from(document.querySelectorAll(".godkann-filter"));
     const tableBody = document.getElementById("tableBody");
     const rowCounter = document.getElementById("rowCounter");
     const syncBtn = document.getElementById("syncBtn");
     const saveBar = document.getElementById("saveBar");
     const saveBatchBtn = document.getElementById("saveBatchBtn");
     
+    // Modal-element
+    const modalBackdrop = document.getElementById("modalBackdrop");
+    const modalBody = document.getElementById("modalBody");
+    const modalBadgeContainer = document.getElementById("modalBadgeContainer");
+    const modalCloseBtn = document.getElementById("modalCloseBtn");
+    
     let currentRows = [];
-    let unsavedChanges = {}; // Håller koll på { orgnr: "Godkänd" | "Nekad" | "RESET" }
+    let unsavedChanges = {}; 
+    let uiRowState = {}; // orgnr -> { mode: 'idle' | 'choose', pendingDecision: null }
     let currentBatchId = 1;
 
     // ----- UI & RENDER ----- //
 
     function updateSaveBar() {
-      if (Object.keys(unsavedChanges).length > 0) {
-        saveBar.style.display = "flex";
-      } else {
-        saveBar.style.display = "none";
+      saveBar.style.display = Object.keys(unsavedChanges).length > 0 ? "flex" : "none";
+    }
+
+    function getDecisionForRender(row) {
+      if (unsavedChanges[row.orgnr] !== undefined) {
+        return unsavedChanges[row.orgnr] === "RESET" ? null : unsavedChanges[row.orgnr];
       }
+      return row.decision;
+    }
+
+    function computeGodkannStatus(row) {
+      const decision = getDecisionForRender(row);
+      const match = row.match === "OK" ? "OK" : "KOLLA";
+      if (decision === "Godkänd") return "Godkänd";
+      if (decision === "Nekad") return "Nekad";
+      if (match === "OK") return "Match";
+      return "Ej beslutad";
     }
 
     function applyFilters() {
       const search = (searchInput.value || "").toLowerCase();
       const matchVal = matchFilter.value;
+      const selectedGodkann = new Set(godkannFilterCheckboxes.filter(cb => cb.checked).map(cb => cb.value));
 
       return currentRows.filter((row) => {
         if (search) {
-          const haystack = (row.orgnr + " " + row.bvName + " " + row.entityOrgName).toLowerCase();
+          const haystack = (row.orgnr + " " + row.bvName + " " + row.entityOrgName + " " + row.entityOrgDispName).toLowerCase();
           if (!haystack.includes(search)) return false;
         }
         if (matchVal !== "ALL" && row.match !== matchVal) return false;
+        
+        const status = computeGodkannStatus(row);
+        if (!selectedGodkann.has(status)) return false;
+        
         return true;
       });
     }
 
-    function getDecisionForRender(row) {
-      // Returnerar antingen det osparade valet, eller det från databasen
-      if (unsavedChanges[row.orgnr] !== undefined) {
-        const local = unsavedChanges[row.orgnr];
-        return local === "RESET" ? null : local;
-      }
-      return row.decision;
-    }
+    function renderDecisionCell(row) {
+      const ui = uiRowState[row.orgnr] || { mode: "idle" };
+      const decision = getDecisionForRender(row);
+      const match = row.match === "OK" ? "OK" : "KOLLA";
 
-    function renderDecisionCell(row, decision) {
-      if (decision === "Godkänd") {
-        return `<span style="margin-right:0.4rem;font-weight:600;color:var(--ok);">Godkänd</span>
-                <button class="btn btn-small" data-action="reset" data-orgnr="${row.orgnr}">Ångra</button>`;
+      // 1. Om användaren har klickat GODKÄNN/NEKA men inte klickat SPARA lokalt än
+      if (ui.mode === "choose") {
+        const label = ui.pendingDecision === "Nekad" ? "Neka" : "Godkänn";
+        return `<span style="margin-right:0.4rem;font-size:0.75rem;">Val: ${label}</span>
+                <button class="btn btn-small btn-ok" data-action="save-local" data-orgnr="${row.orgnr}">SPARA</button>
+                <button class="btn btn-small btn-warn" data-action="cancel" data-orgnr="${row.orgnr}">ÅNGRA</button>`;
       }
-      if (decision === "Nekad") {
-        return `<span style="margin-right:0.4rem;font-weight:600;color:var(--warn);">Nekad</span>
-                <button class="btn btn-small" data-action="reset" data-orgnr="${row.orgnr}">Ångra</button>`;
+
+      // 2. Om det finns ett beslut (antingen i databasen eller i lokala varukorgen)
+      if (decision === "Godkänd" || decision === "Nekad") {
+        const isUnsaved = unsavedChanges[row.orgnr] !== undefined && unsavedChanges[row.orgnr] !== "RESET";
+        const color = decision === "Godkänd" ? "var(--ok)" : "var(--warn)";
+        const label = decision + (isUnsaved ? " *" : ""); // Stjärna indikerar osparat i batchen
+        
+        return `<span style="margin-right:0.4rem;font-weight:600;color:${color};">${label}</span>
+                <button class="btn btn-small" data-action="change" data-orgnr="${row.orgnr}">Ändra</button>`;
       }
-      return `<button class="btn btn-small btn-ok" data-action="approve" data-orgnr="${row.orgnr}">Godkänn</button>
-              <button class="btn btn-small btn-warn" data-action="reject" data-orgnr="${row.orgnr}">Neka</button>`;
+
+      // 3. Om det är en automatisk Match
+      if (match === "OK") {
+        return `<span style="margin-right:0.4rem;">Match</span>
+                <button class="btn btn-small" data-action="change" data-orgnr="${row.orgnr}">Ändra</button>`;
+      }
+
+      // 4. Default: KOLLA-knappar
+      return `<button class="btn btn-small btn-ok" data-action="approve" data-orgnr="${row.orgnr}">GODKÄNN</button>
+              <button class="btn btn-small btn-warn" style="margin-left:0.25rem;" data-action="reject" data-orgnr="${row.orgnr}">NEKA</button>`;
     }
 
     function renderTable() {
@@ -149,12 +263,11 @@
       
       let html = "";
       for (const row of filtered) {
-        const decision = getDecisionForRender(row);
         const isUnsaved = unsavedChanges[row.orgnr] !== undefined;
         const trClass = isUnsaved ? "unsaved-row" : "";
         
         const matchBadge = row.match === "OK" ? '<span class="badge badge-ok">OK</span>' : '<span class="badge badge-warn">KOLLA</span>';
-        const decisionHtml = renderDecisionCell(row, decision);
+        const decisionHtml = renderDecisionCell(row);
         
         const orgNameClass = (!row.matchDetails?.orgNameOk && row.match === "KOLLA") ? 'class="mismatch-cell"' : "";
         const dispNameClass = (!row.matchDetails?.orgDispOk && row.match === "KOLLA") ? 'class="mismatch-cell"' : "";
@@ -163,11 +276,12 @@
         const formStr = row.formKod ? `[${row.formKod}]` : "";
         const verksamhetHtml = `<div style="font-size:0.7rem; color:#666;" title="${sniStr}">${formStr} ${sniStr.substring(0, 15)}...</div>`;
 
-        html += `<tr class="${trClass}">
+        html += `<tr class="${trClass}" data-orgnr="${row.orgnr}">
+          <td class="id-col">${row._id}</td>
           <td>${row.orgnr}</td>
-          <td title="${row.bvName}">${row.bvName}</td>
-          <td ${orgNameClass} title="${row.entityOrgName}">${row.entityOrgName}</td>
-          <td ${dispNameClass} title="${row.entityOrgDispName}">${row.entityOrgDispName}</td>
+          <td>${row.bvName}</td>
+          <td ${orgNameClass}>${row.entityOrgName}</td>
+          <td ${dispNameClass}>${row.entityOrgDispName}</td>
           <td>${verksamhetHtml}</td>
           <td>${matchBadge}</td>
           <td style="text-align:right;">${decisionHtml}</td>
@@ -175,6 +289,47 @@
       }
       tableBody.innerHTML = html;
       updateSaveBar();
+    }
+
+    // ----- MODAL LOGIK ----- //
+    function modalRowHtml(label, value) {
+      return `<div class="modal-row"><div class="modal-label">${label}</div><div class="modal-value">${value || ""}</div></div>`;
+    }
+
+    function openModalForRow(orgnr) {
+      const row = currentRows.find(r => r.orgnr === orgnr);
+      if (!row) return;
+
+      const status = computeGodkannStatus(row);
+      const matchBadge = row.match === "OK" ? '<span class="badge badge-ok">OK</span>' : '<span class="badge badge-warn">KOLLA</span>';
+      
+      let statusBadge = "";
+      if (status === "Godkänd") statusBadge = '<span class="badge badge-ok" style="margin-left:0.25rem;">Godkänd</span>';
+      else if (status === "Nekad") statusBadge = '<span class="badge badge-warn" style="margin-left:0.25rem;">Nekad</span>';
+      else if (status === "Match") statusBadge = '<span class="badge badge-neutral" style="margin-left:0.25rem;">Match</span>';
+      else statusBadge = '<span class="badge badge-neutral" style="margin-left:0.25rem;">Ej beslutad</span>';
+      
+      modalBadgeContainer.innerHTML = matchBadge + statusBadge;
+
+      const fm = row.matchDetails || {};
+      const lines = [];
+      lines.push(modalRowHtml("ID", row._id));
+      lines.push(modalRowHtml("Orgnr", row.orgnr));
+      lines.push(modalRowHtml("EntityID", row.entityId));
+      lines.push(modalRowHtml("BV: Namn", row.bvName));
+      lines.push(modalRowHtml("Entity: OrgName", row.entityOrgName));
+      if (fm.targetOrgName) lines.push(modalRowHtml("Mål OrgName", fm.targetOrgName));
+      lines.push(modalRowHtml("Entity: OrgDispName", row.entityOrgDispName));
+      if (fm.targetOrgDisp) lines.push(modalRowHtml("Mål OrgDispName", fm.targetOrgDisp));
+      
+      const sniStr = (row.sniCodes || []).join(", ");
+      lines.push(modalRowHtml("SNI-koder", sniStr));
+      lines.push(modalRowHtml("Juridisk Form", row.formKod));
+      
+      lines.push(modalRowHtml("Godkänd", status));
+
+      modalBody.innerHTML = lines.join("");
+      modalBackdrop.classList.add("show");
     }
 
     // ----- API ANROP ----- //
@@ -188,15 +343,17 @@
         
         currentRows = data.rows || [];
         currentBatchId = data.currentBatch || batchId;
-        unsavedChanges = {}; // Nollställ ändringar när vi byter vy
+        unsavedChanges = {}; 
+        uiRowState = {};
         
-        // Uppdatera Batch-dropdown
+        // Tilldela ID (Sortera först)
+        currentRows.sort((a, b) => (a.orgnr || "").localeCompare(b.orgnr || ""));
+        currentRows.forEach((row, index) => { row._id = index + 1; });
+        
         const total = data.totalBatches || 1;
         if (batchSelect.options.length === 1 && batchSelect.options[0].value === "1") {
           batchSelect.innerHTML = "";
-          for(let i=1; i<=total; i++) {
-            batchSelect.innerHTML += `<option value="${i}">Batch ${i}</option>`;
-          }
+          for(let i=1; i<=total; i++) batchSelect.innerHTML += `<option value="${i}">Batch ${i}</option>`;
         }
         batchSelect.value = currentBatchId;
 
@@ -219,8 +376,6 @@
           body: JSON.stringify({ batchId: currentBatchId, updates: unsavedChanges })
         });
         if(!res.ok) throw new Error("Failed to save");
-        
-        // Vid OK, hämta om batchen så vi får rätt decidedAt från databasen
         await fetchTable(currentBatchId);
       } catch (e) {
         alert("Gick inte att spara. Försök igen!");
@@ -230,28 +385,12 @@
       }
     }
 
-    async function runSyncMetadata() {
-      if (!confirm("Börja synka metadata? Detta kan ta en liten stund.")) return;
-      syncBtn.disabled = true;
-      document.getElementById("syncStatus").textContent = "Synkar batchar...";
-      try {
-        const res = await fetch(`${API_BASE}/sync-metadata`, { method: "POST" });
-        await res.json();
-        document.getElementById("syncStatus").textContent = "Synk klar!";
-        fetchTable(currentBatchId);
-      } catch (e) {
-        document.getElementById("syncStatus").textContent = "Synk misslyckades.";
-      } finally {
-        syncBtn.disabled = false;
-      }
-    }
-
     // ----- EVENTS ----- //
 
     batchSelect.addEventListener("change", (e) => {
       if (Object.keys(unsavedChanges).length > 0) {
         if(!confirm("Du har osparade ändringar. Vill du byta batch ändå (ändringarna försvinner)?")) {
-          e.target.value = currentBatchId; // Gå tillbaka
+          e.target.value = currentBatchId; 
           return;
         }
       }
@@ -260,20 +399,53 @@
 
     searchInput.addEventListener("input", renderTable);
     matchFilter.addEventListener("change", renderTable);
-    syncBtn.addEventListener("click", runSyncMetadata);
+    godkannFilterCheckboxes.forEach((cb) => cb.addEventListener("change", renderTable));
     saveBatchBtn.addEventListener("click", saveBatch);
+
+    modalCloseBtn.addEventListener("click", () => modalBackdrop.classList.remove("show"));
+    modalBackdrop.addEventListener("click", (e) => { if (e.target === modalBackdrop) modalBackdrop.classList.remove("show"); });
 
     tableBody.addEventListener("click", (e) => {
       const btn = e.target.closest("button");
-      if (!btn) return;
-      const action = btn.getAttribute("data-action");
-      const orgnr = btn.getAttribute("data-orgnr");
+      const tr = e.target.closest("tr[data-orgnr]");
+      if (!tr) return;
+      const orgnr = tr.getAttribute("data-orgnr");
 
-      if (action === "approve") unsavedChanges[orgnr] = "Godkänd";
-      else if (action === "reject") unsavedChanges[orgnr] = "Nekad";
-      else if (action === "reset") unsavedChanges[orgnr] = "RESET";
-      
-      renderTable();
+      // Om klick på knapp
+      if (btn) {
+        e.stopPropagation();
+        const action = btn.getAttribute("data-action");
+
+        if (!uiRowState[orgnr]) uiRowState[orgnr] = { mode: "idle", pendingDecision: null };
+
+        if (action === "approve") {
+          uiRowState[orgnr].mode = "choose";
+          uiRowState[orgnr].pendingDecision = "Godkänd";
+        } else if (action === "reject") {
+          uiRowState[orgnr].mode = "choose";
+          uiRowState[orgnr].pendingDecision = "Nekad";
+        } else if (action === "cancel") {
+          uiRowState[orgnr].mode = "idle";
+          uiRowState[orgnr].pendingDecision = null;
+        } else if (action === "save-local") {
+          // Flytta från "choose"-state till "unsaved batch"-state
+          unsavedChanges[orgnr] = uiRowState[orgnr].pendingDecision;
+          uiRowState[orgnr].mode = "idle";
+        } else if (action === "change") {
+          // Om användaren klickar ändra på en redan godkänd rad
+          uiRowState[orgnr].mode = "choose";
+          uiRowState[orgnr].pendingDecision = null;
+        } else if (action === "reset") {
+          unsavedChanges[orgnr] = "RESET";
+          uiRowState[orgnr].mode = "idle";
+        }
+        
+        renderTable();
+        return;
+      }
+
+      // Om klick på själva raden -> Öppna modal
+      openModalForRow(orgnr);
     });
 
     // INIT
