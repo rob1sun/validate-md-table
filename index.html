@@ -326,7 +326,7 @@
       
       lines.push(`<div class="modal-section-title">Verksamhet (SNI & Form)</div>`);
       lines.push(modalRowHtml("Organisationens Form", row.formKod));
-      lines.push(modalRowHtml("Tillåtna Former", allForms || "(Inga krav)"));
+      lines.push(modalRowHtml("Vitlistade Former", allForms || "(Inga krav)"));
       lines.push(modalRowHtml("Organisationens SNI", (row.sniCodes || []).join(", ")));
       lines.push(modalRowHtml("Tillåtna SNI-prefix", reqSni || "(Inga krav)"));
 
