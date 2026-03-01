@@ -448,7 +448,10 @@
     }
 
    async function runSyncMetadata() {
-      if (!confirm("Börja synka metadata? Detta bygger tabellen och kan ta en liten stund.")) return;
+      const msg = "Börja synka metadata?\n\nOBS! Detta uppdaterar tabellerna. Om någon annan i teamet sitter och klickar på 'Spara ändringar' exakt just nu, kan deras senaste beslut skrivas över.\n\nSäg till teamet att vänta i 10 sekunder innan du klickar OK.";
+      
+      if (!confirm(msg)) return; // Om användaren klickar Avbryt, stannar vi här
+      
       syncBtn.disabled = true;
       document.getElementById("syncStatus").textContent = "Synkar batchar...";
       try {
@@ -456,7 +459,7 @@
         if (!res.ok) throw new Error("Något gick fel");
         await res.json();
         document.getElementById("syncStatus").textContent = "Synk klar!";
-        fetchTable(currentBatchId); // Laddar om tabellen så du ser resultatet
+        fetchTable(currentBatchId); 
       } catch (e) {
         document.getElementById("syncStatus").textContent = "Synk misslyckades.";
       } finally {
