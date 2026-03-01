@@ -29,10 +29,9 @@
     .chip-check {display:inline-flex;align-items:center;gap:.25rem;padding:.12rem .5rem;border-radius:999px;border:1px solid var(--chip-border);background:var(--chip-bg);cursor:pointer;font-size:.75rem;}
     .chip-check input[type="checkbox"] {margin:0;}
     
-    .table-wrapper {border-radius:.75rem;border:1px solid var(--border);overflow-x:auto;background:#ffffff}
+    .table-wrapper {border-radius:.75rem;border:1px solid var(--border);overflow-x:auto;background:#ffffff;max-height: 70vh;}
     table {width:100%;border-collapse:collapse;font-size:.8rem;table-layout:fixed}
-    thead {background:#f9fafb}
-    /* FIX: Borttagen white-space nowrap för radbrytning */
+    thead th {background:#f9fafb;position:sticky;top:0;z-index:2;box-shadow: 0 1px 0 var(--border);}
     th, td {padding:.35rem .4rem;border-bottom:1px solid #e5e7eb;vertical-align:middle;text-align:left;word-break:break-word;}
     th {font-weight:600;color:#4b5563;font-size:.78rem}
     tbody tr {cursor:pointer;}
@@ -45,21 +44,21 @@
     .badge-neutral {background:#e5e7eb;color:#374151;border:1px solid #d1d5db}
     
     .unsaved-row td { background-color: var(--unsaved-bg) !important; }
-    .mismatch-cell {color:#b91c1c;background:#fef2f2;font-weight:500}
+    .mismatch-cell {color:#b91c1c;background:#fef2f2;font-weight:500; border: 1px solid #fecaca;}
     .status-text {font-size:.75rem;color:var(--muted)}
     .save-bar {background:#eef2ff;border:1px solid #c7d2fe;padding:0.5rem 1rem;border-radius:0.5rem;display:flex;justify-content:space-between;align-items:center;margin-bottom:0.8rem;display:none;}
     
     /* MODAL CSS */
     .modal-backdrop {position:fixed;inset:0;background:rgba(15,23,42,.35);display:none;align-items:center;justify-content:center;z-index:30;}
     .modal-backdrop.show {display:flex;}
-    .modal {background:#ffffff;border-radius:.9rem;padding:.9rem 1rem;max-width:520px;width:100%;box-shadow:0 18px 40px rgba(15,23,42,.35);font-size:.8rem;}
+    .modal {background:#ffffff;border-radius:.9rem;padding:.9rem 1rem;max-width:600px;width:100%;box-shadow:0 18px 40px rgba(15,23,42,.35);font-size:.8rem;}
     .modal-header {display:flex;align-items:center;justify-content:space-between;margin-bottom:.4rem;}
     .modal-title {font-weight:600;font-size:.9rem;}
     .modal-body {display:flex;flex-direction:column;gap:.25rem;margin-bottom:.6rem;max-height:60vh;overflow-y:auto;}
-    .modal-row {display:flex;gap:.4rem;}
-    .modal-label {width:130px;color:var(--muted);flex-shrink:0;}
+    .modal-row {display:flex;gap:.4rem; padding: 0.2rem 0; border-bottom: 1px solid #f3f4f6;}
+    .modal-label {width:160px;color:var(--muted);flex-shrink:0;font-weight:500;}
     .modal-value {flex:1;word-break:break-word;}
-    .modal-footer {display:flex;justify-content:flex-end;gap:.4rem;align-items:center;}
+    .modal-section-title {font-weight:600; font-size: 0.85rem; margin-top: 0.5rem; color: #111827;}
   </style>
 </head>
 <body>
@@ -69,7 +68,7 @@
       <h1>BV / Metadata – validering</h1>
       <div class="header-actions">
         <button id="syncBtn" class="btn btn-primary" type="button">Läs in metadata</button>
-        <button id="exportCsvBtn" class="btn" type="button">Exportera CSV (Aktuell Batch)</button>
+        <button id="exportCsvBtn" class="btn" type="button">Exportera CSV</button>
         <a href="/valideringsregler/" class="btn btn-ghost" type="button">Valideringsregler</a>
       </div>
     </div>
@@ -78,15 +77,15 @@
   <section class="card">
     <div class="filter-row">
       <div class="filter-group">
-        <div class="filter-label">Välj Batch</div>
+        <div class="filter-label">Välj Vy</div>
         <select id="batchSelect">
           <option value="1">Laddar batchar...</option>
         </select>
       </div>
 
       <div class="filter-group">
-        <div class="filter-label">Sök i batch</div>
-        <input type="text" id="searchInput" placeholder="Sök..." />
+        <div class="filter-label">Sök</div>
+        <input type="text" id="searchInput" placeholder="Sök orgnr, namn..." />
       </div>
 
       <div class="filter-group">
@@ -110,13 +109,13 @@
 
       <div class="filter-group" style="margin-left:auto;">
         <div class="filter-label">Status</div>
-        <span id="rowCounter" style="font-size:0.75rem;">Visar 0 poster</span>
+        <span id="rowCounter" style="font-size:0.75rem; font-weight: 600;">Visar 0 poster</span>
       </div>
     </div>
 
     <div id="saveBar" class="save-bar">
-      <span style="font-size:0.85rem;font-weight:600;color:#1e40af;">Du har osparade ändringar i denna batch!</span>
-      <button id="saveBatchBtn" class="btn btn-primary">Spara Batch till databasen</button>
+      <span style="font-size:0.85rem;font-weight:600;color:#1e40af;" id="saveBarText">Du har osparade ändringar i denna vy!</span>
+      <button id="saveBatchBtn" class="btn btn-primary">Spara ändringar till databasen</button>
     </div>
 
     <div class="table-wrapper">
@@ -125,12 +124,12 @@
         <tr>
           <th style="width:44px;text-align:right;">ID</th>
           <th style="width:100px;">Orgnr</th>
-          <th style="width:200px;">BV: Namn</th>
+          <th style="width:180px;">BV: Namn</th>
           <th style="width:180px;">Entity: OrgName</th>
           <th style="width:180px;">Entity: OrgDispName</th>
-          <th style="width:110px;">Form & SNI</th>
+          <th style="width:120px;">Form & SNI</th>
           <th style="width:70px;">Match</th>
-          <th style="width:190px;text-align:right;">Beslut</th>
+          <th style="width:180px;text-align:right;">Beslut</th>
         </tr>
         </thead>
         <tbody id="tableBody"></tbody>
@@ -168,19 +167,20 @@
     const tableBody = document.getElementById("tableBody");
     const rowCounter = document.getElementById("rowCounter");
     const syncBtn = document.getElementById("syncBtn");
+    const exportCsvBtn = document.getElementById("exportCsvBtn");
     const saveBar = document.getElementById("saveBar");
     const saveBatchBtn = document.getElementById("saveBatchBtn");
     
-    // Modal-element
     const modalBackdrop = document.getElementById("modalBackdrop");
     const modalBody = document.getElementById("modalBody");
     const modalBadgeContainer = document.getElementById("modalBadgeContainer");
     const modalCloseBtn = document.getElementById("modalCloseBtn");
     
     let currentRows = [];
+    let activeRules = {}; // Sparar reglerna för att visa i modalen
     let unsavedChanges = {}; 
-    let uiRowState = {}; // orgnr -> { mode: 'idle' | 'choose', pendingDecision: null }
-    let currentBatchId = 1;
+    let uiRowState = {}; 
+    let currentBatchId = "1";
 
     // ----- UI & RENDER ----- //
 
@@ -215,10 +215,8 @@
           if (!haystack.includes(search)) return false;
         }
         if (matchVal !== "ALL" && row.match !== matchVal) return false;
-        
         const status = computeGodkannStatus(row);
         if (!selectedGodkann.has(status)) return false;
-        
         return true;
       });
     }
@@ -228,7 +226,6 @@
       const decision = getDecisionForRender(row);
       const match = row.match === "OK" ? "OK" : "KOLLA";
 
-      // 1. Om användaren har klickat GODKÄNN/NEKA men inte klickat SPARA lokalt än
       if (ui.mode === "choose") {
         const label = ui.pendingDecision === "Nekad" ? "Neka" : "Godkänn";
         return `<span style="margin-right:0.4rem;font-size:0.75rem;">Val: ${label}</span>
@@ -236,45 +233,43 @@
                 <button class="btn btn-small btn-warn" data-action="cancel" data-orgnr="${row.orgnr}">ÅNGRA</button>`;
       }
 
-      // 2. Om det finns ett beslut (antingen i databasen eller i lokala varukorgen)
       if (decision === "Godkänd" || decision === "Nekad") {
         const isUnsaved = unsavedChanges[row.orgnr] !== undefined && unsavedChanges[row.orgnr] !== "RESET";
         const color = decision === "Godkänd" ? "var(--ok)" : "var(--warn)";
-        const label = decision + (isUnsaved ? " *" : ""); // Stjärna indikerar osparat i batchen
-        
+        const label = decision + (isUnsaved ? " *" : ""); 
         return `<span style="margin-right:0.4rem;font-weight:600;color:${color};">${label}</span>
                 <button class="btn btn-small" data-action="change" data-orgnr="${row.orgnr}">Ändra</button>`;
       }
 
-      // 3. Om det är en automatisk Match
       if (match === "OK") {
         return `<span style="margin-right:0.4rem;">Match</span>
                 <button class="btn btn-small" data-action="change" data-orgnr="${row.orgnr}">Ändra</button>`;
       }
 
-      // 4. Default: KOLLA-knappar
       return `<button class="btn btn-small btn-ok" data-action="approve" data-orgnr="${row.orgnr}">GODKÄNN</button>
               <button class="btn btn-small btn-warn" style="margin-left:0.25rem;" data-action="reject" data-orgnr="${row.orgnr}">NEKA</button>`;
     }
 
     function renderTable() {
       const filtered = applyFilters();
-      rowCounter.textContent = `Visar ${filtered.length} av ${currentRows.length} i Batch ${currentBatchId}`;
+      const batchLabel = currentBatchId === "ALL" ? "Alla batchar" : `Batch ${currentBatchId}`;
+      rowCounter.textContent = `Visar ${filtered.length} av ${currentRows.length} poster (${batchLabel})`;
       
       let html = "";
       for (const row of filtered) {
         const isUnsaved = unsavedChanges[row.orgnr] !== undefined;
         const trClass = isUnsaved ? "unsaved-row" : "";
-        
         const matchBadge = row.match === "OK" ? '<span class="badge badge-ok">OK</span>' : '<span class="badge badge-warn">KOLLA</span>';
         const decisionHtml = renderDecisionCell(row);
         
+        // RÖDA CELLER
         const orgNameClass = (!row.matchDetails?.orgNameOk && row.match === "KOLLA") ? 'class="mismatch-cell"' : "";
         const dispNameClass = (!row.matchDetails?.orgDispOk && row.match === "KOLLA") ? 'class="mismatch-cell"' : "";
+        const sniClass = (!row.matchDetails?.sniFormOk && row.match === "KOLLA") ? 'class="mismatch-cell"' : "";
         
         const sniStr = (row.sniCodes || []).join(", ");
         const formStr = row.formKod ? `[${row.formKod}]` : "";
-        const verksamhetHtml = `<div style="font-size:0.7rem; color:#666;" title="${sniStr}">${formStr} ${sniStr.substring(0, 15)}...</div>`;
+        const verksamhetHtml = `<div style="font-size:0.7rem;" title="${sniStr}">${formStr} ${sniStr.substring(0, 15)}...</div>`;
 
         html += `<tr class="${trClass}" data-orgnr="${row.orgnr}">
           <td class="id-col">${row._id}</td>
@@ -282,7 +277,7 @@
           <td>${row.bvName}</td>
           <td ${orgNameClass}>${row.entityOrgName}</td>
           <td ${dispNameClass}>${row.entityOrgDispName}</td>
-          <td>${verksamhetHtml}</td>
+          <td ${sniClass}>${verksamhetHtml}</td>
           <td>${matchBadge}</td>
           <td style="text-align:right;">${decisionHtml}</td>
         </tr>`;
@@ -312,28 +307,80 @@
       modalBadgeContainer.innerHTML = matchBadge + statusBadge;
 
       const fm = row.matchDetails || {};
+      const sniConf = activeRules.sniConfig || {};
+      const reqSni = (sniConf.requiredSni || []).join(", ");
+      const allForms = (sniConf.allowedForms || []).join(", ");
+
       const lines = [];
-      lines.push(modalRowHtml("ID", row._id));
-      lines.push(modalRowHtml("Orgnr", row.orgnr));
+      lines.push(`<div class="modal-section-title">Allmänt</div>`);
+      lines.push(modalRowHtml("ID / Orgnr", `${row._id} / ${row.orgnr}`));
       lines.push(modalRowHtml("EntityID", row.entityId));
+      lines.push(modalRowHtml("Godkännandestatus", status));
+
+      lines.push(`<div class="modal-section-title">Namnmatchning</div>`);
       lines.push(modalRowHtml("BV: Namn", row.bvName));
       lines.push(modalRowHtml("Entity: OrgName", row.entityOrgName));
       if (fm.targetOrgName) lines.push(modalRowHtml("Mål OrgName", fm.targetOrgName));
       lines.push(modalRowHtml("Entity: OrgDispName", row.entityOrgDispName));
       if (fm.targetOrgDisp) lines.push(modalRowHtml("Mål OrgDispName", fm.targetOrgDisp));
       
-      const sniStr = (row.sniCodes || []).join(", ");
-      lines.push(modalRowHtml("SNI-koder", sniStr));
-      lines.push(modalRowHtml("Juridisk Form", row.formKod));
-      
-      lines.push(modalRowHtml("Godkänd", status));
+      lines.push(`<div class="modal-section-title">Verksamhet (SNI & Form)</div>`);
+      lines.push(modalRowHtml("Organisationens Form", row.formKod));
+      lines.push(modalRowHtml("Tillåtna Former", allForms || "(Inga krav)"));
+      lines.push(modalRowHtml("Organisationens SNI", (row.sniCodes || []).join(", ")));
+      lines.push(modalRowHtml("Tillåtna SNI-prefix", reqSni || "(Inga krav)"));
 
       modalBody.innerHTML = lines.join("");
       modalBackdrop.classList.add("show");
     }
 
-    // ----- API ANROP ----- //
+    // ----- EXPORT CSV ----- //
+    function buildCsv(rows) {
+      // Vi använder semikolon och en UTF-8 BOM för att Excel ska gilla åäö
+      const header = ["ID", "Orgnr", "BV_Namn", "Entity_OrgName", "Entity_OrgDispName", "Juridisk_Form", "SNI_Koder", "Match_Status", "Beslut"];
+      const lines = [header.join(";")];
 
+      for (const row of rows) {
+        const status = computeGodkannStatus(row);
+        const fields = [
+          row._id || "",
+          row.orgnr || "",
+          row.bvName || "",
+          row.entityOrgName || "",
+          row.entityOrgDispName || "",
+          row.formKod || "",
+          (row.sniCodes || []).join(", "),
+          row.match || "",
+          status
+        ];
+        
+        const escaped = fields.map((v) => {
+          const s = String(v || "");
+          if (s.includes(";") || s.includes('"') || s.includes("\n")) return '"' + s.replace(/"/g, '""') + '"';
+          return s;
+        });
+        lines.push(escaped.join(";"));
+      }
+      return "\uFEFF" + lines.join("\r\n"); // \uFEFF är UTF-8 BOM
+    }
+
+    function exportCsv() {
+      const filtered = applyFilters();
+      if (!filtered.length) { alert("Inga poster att exportera med aktuella filter."); return; }
+      
+      const csv = buildCsv(filtered);
+      const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `validering_export_${currentBatchId === "ALL" ? "alla" : "batch_"+currentBatchId}.csv`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+    }
+
+    // ----- API ANROP ----- //
     async function fetchTable(batchId) {
       document.getElementById("tableStatus").textContent = "Laddar data...";
       try {
@@ -342,22 +389,26 @@
         const data = await res.json();
         
         currentRows = data.rows || [];
+        activeRules = data.activeRules || {};
         currentBatchId = data.currentBatch || batchId;
         unsavedChanges = {}; 
         uiRowState = {};
         
-        // Tilldela ID (Sortera först)
+        // Tilldela ID 
         currentRows.sort((a, b) => (a.orgnr || "").localeCompare(b.orgnr || ""));
         currentRows.forEach((row, index) => { row._id = index + 1; });
         
+        // Fyll Dropdown
         const total = data.totalBatches || 1;
         if (batchSelect.options.length === 1 && batchSelect.options[0].value === "1") {
           batchSelect.innerHTML = "";
           for(let i=1; i<=total; i++) batchSelect.innerHTML += `<option value="${i}">Batch ${i}</option>`;
+          // LÄGG TILL "ALLA"
+          if(total > 1) batchSelect.innerHTML += `<option value="ALL">Alla batchar (Fullständig lista)</option>`;
         }
         batchSelect.value = currentBatchId;
 
-        document.getElementById("tableStatus").textContent = `Laddade Batch ${currentBatchId}`;
+        document.getElementById("tableStatus").textContent = `Laddade vy: ${currentBatchId === "ALL" ? "Alla batchar" : "Batch "+currentBatchId}`;
         renderTable();
       } catch (e) {
         document.getElementById("tableStatus").textContent = "Kunde inte ladda data.";
@@ -381,15 +432,14 @@
         alert("Gick inte att spara. Försök igen!");
       } finally {
         saveBatchBtn.disabled = false;
-        saveBatchBtn.textContent = "Spara Batch till databasen";
+        saveBatchBtn.textContent = "Spara ändringar till databasen";
       }
     }
 
     // ----- EVENTS ----- //
-
     batchSelect.addEventListener("change", (e) => {
       if (Object.keys(unsavedChanges).length > 0) {
-        if(!confirm("Du har osparade ändringar. Vill du byta batch ändå (ändringarna försvinner)?")) {
+        if(!confirm("Du har osparade ändringar. Vill du byta vy ändå (ändringarna försvinner)?")) {
           e.target.value = currentBatchId; 
           return;
         }
@@ -401,6 +451,7 @@
     matchFilter.addEventListener("change", renderTable);
     godkannFilterCheckboxes.forEach((cb) => cb.addEventListener("change", renderTable));
     saveBatchBtn.addEventListener("click", saveBatch);
+    exportCsvBtn.addEventListener("click", exportCsv);
 
     modalCloseBtn.addEventListener("click", () => modalBackdrop.classList.remove("show"));
     modalBackdrop.addEventListener("click", (e) => { if (e.target === modalBackdrop) modalBackdrop.classList.remove("show"); });
@@ -411,45 +462,33 @@
       if (!tr) return;
       const orgnr = tr.getAttribute("data-orgnr");
 
-      // Om klick på knapp
       if (btn) {
         e.stopPropagation();
         const action = btn.getAttribute("data-action");
-
         if (!uiRowState[orgnr]) uiRowState[orgnr] = { mode: "idle", pendingDecision: null };
 
         if (action === "approve") {
-          uiRowState[orgnr].mode = "choose";
-          uiRowState[orgnr].pendingDecision = "Godkänd";
+          uiRowState[orgnr].mode = "choose"; uiRowState[orgnr].pendingDecision = "Godkänd";
         } else if (action === "reject") {
-          uiRowState[orgnr].mode = "choose";
-          uiRowState[orgnr].pendingDecision = "Nekad";
+          uiRowState[orgnr].mode = "choose"; uiRowState[orgnr].pendingDecision = "Nekad";
         } else if (action === "cancel") {
-          uiRowState[orgnr].mode = "idle";
-          uiRowState[orgnr].pendingDecision = null;
+          uiRowState[orgnr].mode = "idle"; uiRowState[orgnr].pendingDecision = null;
         } else if (action === "save-local") {
-          // Flytta från "choose"-state till "unsaved batch"-state
           unsavedChanges[orgnr] = uiRowState[orgnr].pendingDecision;
           uiRowState[orgnr].mode = "idle";
         } else if (action === "change") {
-          // Om användaren klickar ändra på en redan godkänd rad
-          uiRowState[orgnr].mode = "choose";
-          uiRowState[orgnr].pendingDecision = null;
+          uiRowState[orgnr].mode = "choose"; uiRowState[orgnr].pendingDecision = null;
         } else if (action === "reset") {
-          unsavedChanges[orgnr] = "RESET";
-          uiRowState[orgnr].mode = "idle";
+          unsavedChanges[orgnr] = "RESET"; uiRowState[orgnr].mode = "idle";
         }
-        
         renderTable();
         return;
       }
-
-      // Om klick på själva raden -> Öppna modal
       openModalForRow(orgnr);
     });
 
     // INIT
-    fetchTable(1);
+    fetchTable("1");
   })();
 </script>
 </body>
