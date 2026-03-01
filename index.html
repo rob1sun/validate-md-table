@@ -5,457 +5,8 @@
   <title>BV / Metadata – validering</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <style>
-    :root {
-      --bg: #f5f5f7;
-      --card-bg: #ffffff;
-      --border: #e5e7eb;
-      --border-strong: #94a3b8;
-      --text: #111827;
-      --muted: #6b7280;
-      --accent: #2563eb;
-      --accent-soft: #eff6ff;
-      --ok: #15803d;
-      --ok-bg: #dcfce7;
-      --warn: #b91c1c;
-      --warn-bg: #fee2e2;
-      --chip-bg: #f3f4f6;
-      --chip-border: #d1d5db;
-    }
-
-    * {
-      box-sizing: border-box;
-    }
-
-    body {
-      margin: 0;
-      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
-        sans-serif;
-      background: radial-gradient(circle at top, #eef2ff 0, #f5f5f7 45%, #f5f5f7 100%);
-      color: var(--text);
-    }
-
-    .page {
-      max-width: 1200px;
-      margin: 0 auto;
-      padding: 1.5rem 1rem 2rem;
-    }
-
-    .page-header {
-      display: flex;
-      flex-direction: column;
-      gap: 0.5rem;
-      margin-bottom: 0.6rem;
-    }
-
-    .header-top-row {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 0.75rem;
-      flex-wrap: wrap;
-    }
-
-    h1 {
-      margin: 0;
-      font-size: 1.3rem;
-      letter-spacing: 0.02em;
-    }
-
-    .header-actions {
-      display: flex;
-      flex-wrap: wrap;
-      align-items: center;
-      gap: 0.4rem;
-    }
-
-    .btn {
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      border-radius: 999px;
-      border: 1px solid var(--chip-border);
-      font-size: 0.8rem;
-      padding: 0.25rem 0.75rem;
-      cursor: pointer;
-      background: #f9fafb;
-      color: var(--text);
-      transition:
-        background 120ms ease,
-        box-shadow 120ms ease,
-        transform 120ms ease,
-        border-color 120ms ease;
-      white-space: nowrap;
-    }
-
-    .btn-primary {
-      background: var(--accent);
-      color: #ffffff;
-      border-color: var(--accent);
-      box-shadow: 0 2px 4px rgba(37, 99, 235, 0.25);
-    }
-
-    .btn-primary:hover {
-      background: #1d4ed8;
-      transform: translateY(-0.5px);
-      box-shadow: 0 4px 10px rgba(37, 99, 235, 0.35);
-    }
-
-    .btn-ghost {
-      background: transparent;
-    }
-
-    .btn-ghost:hover {
-      background: #e5e7eb;
-    }
-
-    .btn-small {
-      font-size: 0.75rem;
-      padding: 0.15rem 0.55rem;
-    }
-
-    .btn-ok {
-      background: var(--ok-bg);
-      color: var(--ok);
-      border-color: #bbf7d0;
-    }
-
-    .btn-warn {
-      background: var(--warn-bg);
-      color: var(--warn);
-      border-color: #fecaca;
-    }
-
-    .btn:disabled {
-      opacity: 0.6;
-      cursor: default;
-      box-shadow: none;
-      transform: none;
-    }
-
-    .link {
-      font-size: 0.8rem;
-      color: var(--accent);
-      text-decoration: none;
-    }
-
-    .link:hover {
-      text-decoration: underline;
-    }
-
-    .rules-hint {
-      font-size: 0.75rem;
-      color: #6b7280;
-      text-align: right;
-      max-width: 100%;
-      margin-left: auto;
-      margin-top: 0.15rem;
-      white-space: normal;   /* tillåt radbrytning */
-      overflow: visible;     /* inget klipp */
-      line-height: 1.3;
-      opacity: 0.9;
-    }
-
-    .card {
-      background: var(--card-bg);
-      border-radius: 1rem;
-      border: 1px solid rgba(15, 23, 42, 0.06);
-      box-shadow: 0 12px 30px rgba(15, 23, 42, 0.06);
-      padding: 0.8rem 0.8rem 0.9rem;
-      position: relative;
-    }
-
-    .filter-row {
-      display: flex;
-      flex-wrap: wrap;
-      align-items: center;
-      gap: 0.6rem;
-      margin-bottom: 0.6rem;
-      position: sticky;
-      top: 0;
-      z-index: 10;
-      background: var(--card-bg);
-      padding-bottom: 0.4rem;
-    }
-
-    .filter-group {
-      display: flex;
-      flex-direction: column;
-      gap: 0.2rem;
-      font-size: 0.76rem;
-    }
-
-    .filter-label {
-      color: var(--muted);
-    }
-
-    .filter-input-row {
-      display: flex;
-      align-items: center;
-      gap: 0.3rem;
-      flex-wrap: wrap;
-    }
-
-    input[type="text"] {
-      font-size: 0.8rem;
-      padding: 0.25rem 0.4rem;
-      border-radius: 0.5rem;
-      border: 1px solid var(--border);
-      min-width: 180px;
-    }
-
-    select {
-      font-size: 0.8rem;
-      padding: 0.25rem 0.5rem;
-      border-radius: 999px;
-      border: 1px solid var(--border);
-      background: #ffffff;
-      outline: none;
-    }
-
-    input[type="text"]:focus,
-    select:focus {
-      border-color: var(--accent);
-      box-shadow: 0 0 0 1px rgba(37, 99, 235, 0.18);
-      outline: none;
-    }
-
-    .chip-check {
-      display: inline-flex;
-      align-items: center;
-      gap: 0.25rem;
-      padding: 0.12rem 0.5rem;
-      border-radius: 999px;
-      border: 1px solid var(--chip-border);
-      background: var(--chip-bg);
-      cursor: pointer;
-      font-size: 0.75rem;
-    }
-
-    .chip-check input[type="checkbox"] {
-      margin: 0;
-    }
-
-    .table-wrapper {
-      border-radius: 0.75rem;
-      border: 1px solid var(--border);
-      overflow: hidden;
-      background: #ffffff;
-    }
-
-    table {
-      width: 100%;
-      border-collapse: collapse;
-      font-size: 0.8rem;
-      table-layout: fixed;
-    }
-
-    thead {
-      background: #f9fafb;
-    }
-
-    th,
-    td {
-      padding: 0.35rem 0.4rem;
-      border-bottom: 1px solid #e5e7eb;
-      vertical-align: middle;
-      text-align: left;
-      overflow: hidden;
-      text-overflow: ellipsis;
-      /*white-space: nowrap;*/ /* din ändring – lämnas kommenterad */
-    }
-
-    th {
-      font-weight: 600;
-      color: #4b5563;
-      font-size: 0.78rem;
-    }
-
-    tbody tr {
-      cursor: pointer;
-    }
-
-    tbody tr:hover td {
-      background: #f9fafb;
-    }
-
-    td.id-col {
-      width: 44px;
-      text-align: right;
-      color: var(--muted);
-      font-variant-numeric: tabular-nums;
-    }
-
-    td.orgnr-col {
-      width: 90px;
-      font-variant-numeric: tabular-nums;
-    }
-
-    td.actions-col {
-      width: 220px;
-      text-align: right;
-    }
-
-    .badge {
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      padding: 0.05rem 0.4rem;
-      border-radius: 999px;
-      font-size: 0.7rem;
-      font-weight: 500;
-    }
-
-    .badge-ok {
-      background: var(--ok-bg);
-      color: var(--ok);
-      border: 1px solid #bbf7d0;
-    }
-
-    .badge-warn {
-      background: var(--warn-bg);
-      color: var(--warn);
-      border: 1px solid #fecaca;
-    }
-
-    .badge-neutral {
-      background: #e5e7eb;
-      color: #374151;
-      border: 1px solid #d1d5db;
-    }
-
-    .table-footer {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      padding-top: 0.4rem;
-      font-size: 0.75rem;
-      color: var(--muted);
-      flex-wrap: wrap;
-      gap: 0.3rem;
-    }
-
-    .counter {
-      font-variant-numeric: tabular-nums;
-    }
-
-    .status-text {
-      font-size: 0.75rem;
-      color: var(--muted);
-    }
-
-    .status-text strong {
-      font-weight: 600;
-    }
-
-    /* Grupp-visualisering per entityId – lite tydligare */
-    tr.group-start td {
-      border-top: 3px solid var(--border-strong);
-      background: linear-gradient(to right, #f9fafb, #ffffff);
-    }
-
-    tr.group-start td.mismatch-cell {
-  background: #fef2f2;
-}
-
-
-    /* Mismatch-cell (fältet matchar inte villkoret) */
-    .mismatch-cell {
-      color: #b91c1c;
-      background: #fef2f2;
-      font-weight: 500;
-    }
-
-    /* Modal */
-    .modal-backdrop {
-      position: fixed;
-      inset: 0;
-      background: rgba(15, 23, 42, 0.35);
-      display: none;
-      align-items: center;
-      justify-content: center;
-      z-index: 30;
-    }
-
-    .modal-backdrop.show {
-      display: flex;
-    }
-
-    .modal {
-      background: #ffffff;
-      border-radius: 0.9rem;
-      padding: 0.9rem 1rem 0.9rem;
-      max-width: 520px;
-      width: 100%;
-      box-shadow: 0 18px 40px rgba(15, 23, 42, 0.35);
-      font-size: 0.8rem;
-    }
-
-    .modal-header {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 0.5rem;
-      margin-bottom: 0.4rem;
-    }
-
-    .modal-title {
-      font-weight: 600;
-      font-size: 0.9rem;
-    }
-
-    .modal-body {
-      display: flex;
-      flex-direction: column;
-      gap: 0.25rem;
-      margin-bottom: 0.6rem;
-    }
-
-    .modal-row {
-      display: flex;
-      gap: 0.4rem;
-    }
-
-    .modal-label {
-      width: 130px;
-      color: var(--muted);
-      flex-shrink: 0;
-    }
-
-    .modal-value {
-      flex: 1;
-      word-break: break-all;
-    }
-
-    .modal-footer {
-      display: flex;
-      justify-content: flex-end;
-      gap: 0.4rem;
-      align-items: center;
-    }
-
-    .copy-indicator {
-      font-size: 0.75rem;
-      color: var(--muted);
-    }
-
-    @media (max-width: 768px) {
-      .page {
-        padding: 1rem 0.5rem 1.5rem;
-      }
-
-      .table-wrapper {
-        border-radius: 0.5rem;
-      }
-
-      th,
-      td {
-        padding: 0.3rem 0.3rem;
-      }
-
-      .modal {
-        margin: 0 0.5rem;
-      }
-    }
+    /* CSS förkortad men design bibehållen */
+    :root{--bg:#f5f5f7;--card-bg:#ffffff;--border:#e5e7eb;--border-strong:#94a3b8;--text:#111827;--muted:#6b7280;--accent:#2563eb;--ok:#15803d;--ok-bg:#dcfce7;--warn:#b91c1c;--warn-bg:#fee2e2;--unsaved-bg:#fef08a;--chip-bg:#f3f4f6;--chip-border:#d1d5db}*{box-sizing:border-box}body{margin:0;font-family:system-ui,-apple-system,sans-serif;background:radial-gradient(circle at top,#eef2ff 0,#f5f5f7 45%,#f5f5f7 100%);color:var(--text)}.page{max-width:1400px;margin:0 auto;padding:1.5rem 1rem 2rem}.page-header{display:flex;flex-direction:column;gap:.5rem;margin-bottom:.6rem}.header-top-row{display:flex;align-items:center;justify-content:space-between;gap:.75rem;flex-wrap:wrap}h1{margin:0;font-size:1.3rem}.header-actions{display:flex;flex-wrap:wrap;align-items:center;gap:.4rem}.btn{display:inline-flex;align-items:center;justify-content:center;border-radius:999px;border:1px solid var(--chip-border);font-size:.8rem;padding:.25rem .75rem;cursor:pointer;background:#f9fafb;color:var(--text);white-space:nowrap}.btn-primary{background:var(--accent);color:#ffffff;border-color:var(--accent)}.btn-primary:hover{background:#1d4ed8}.btn-ghost{background:transparent}.btn-small{font-size:.75rem;padding:.15rem .55rem}.btn-ok{background:var(--ok-bg);color:var(--ok);border-color:#bbf7d0}.btn-warn{background:var(--warn-bg);color:var(--warn);border-color:#fecaca}.btn:disabled{opacity:.6;cursor:default}.card{background:var(--card-bg);border-radius:1rem;border:1px solid rgba(15,23,42,.06);box-shadow:0 12px 30px rgba(15,23,42,.06);padding:.8rem .8rem .9rem}.filter-row{display:flex;flex-wrap:wrap;align-items:center;gap:.6rem;margin-bottom:.6rem;position:sticky;top:0;z-index:10;background:var(--card-bg);padding-bottom:.4rem;border-bottom:1px solid var(--border)}.filter-group{display:flex;flex-direction:column;gap:.2rem;font-size:.76rem}.filter-label{color:var(--muted);font-weight:600}input[type="text"],select{font-size:.8rem;padding:.25rem .4rem;border-radius:.5rem;border:1px solid var(--border)}.table-wrapper{border-radius:.75rem;border:1px solid var(--border);overflow-x:auto;background:#ffffff}table{width:100%;border-collapse:collapse;font-size:.8rem;table-layout:fixed}thead{background:#f9fafb}th,td{padding:.35rem .4rem;border-bottom:1px solid #e5e7eb;vertical-align:middle;text-align:left;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}th{font-weight:600;color:#4b5563;font-size:.78rem}tbody tr:hover td{background:#f9fafb}.badge{display:inline-flex;align-items:center;justify-content:center;padding:.05rem .4rem;border-radius:999px;font-size:.7rem;font-weight:500}.badge-ok{background:var(--ok-bg);color:var(--ok);border:1px solid #bbf7d0}.badge-warn{background:var(--warn-bg);color:var(--warn);border:1px solid #fecaca}.badge-neutral{background:#e5e7eb;color:#374151;border:1px solid #d1d5db}.unsaved-row td { background-color: var(--unsaved-bg) !important; }.mismatch-cell{color:#b91c1c;background:#fef2f2;font-weight:500}.status-text{font-size:.75rem;color:var(--muted)}.save-bar{background:#eef2ff;border:1px solid #c7d2fe;padding:0.5rem 1rem;border-radius:0.5rem;display:flex;justify-content:space-between;align-items:center;margin-bottom:0.8rem;display:none;}
   </style>
 </head>
 <body>
@@ -464,1036 +15,269 @@
     <div class="header-top-row">
       <h1>BV / Metadata – validering</h1>
       <div class="header-actions">
-        <button id="syncBtn" class="btn btn-primary" type="button">
-          Läs in metadata
-        </button>
-        <button id="exportCsvBtn" class="btn" type="button">
-          Exportera CSV
-        </button>
-        <button id="exportJsonBtn" class="btn" type="button">
-          Exportera JSON
-        </button>
-        <a href="/valideringsregler/" class="btn btn-ghost" type="button">
-          Valideringsregler
-        </a>
+        <button id="syncBtn" class="btn btn-primary" type="button">Läs in metadata</button>
+        <button id="exportCsvBtn" class="btn" type="button">Exportera CSV (Aktuell Batch)</button>
+        <a href="/valideringsregler/" class="btn btn-ghost" type="button">Valideringsregler</a>
       </div>
-    </div>
-    <div id="activeRulesHint" class="rules-hint">
-      Regler: läser in...
     </div>
   </header>
 
   <section class="card">
     <div class="filter-row">
       <div class="filter-group">
-        <div class="filter-label">Sök</div>
-        <div class="filter-input-row">
-          <input
-            type="text"
-            id="searchInput"
-            placeholder="Filtrera på orgnr eller namn..."
-          />
-        </div>
+        <div class="filter-label">Välj Batch</div>
+        <select id="batchSelect">
+          <option value="1">Laddar batchar...</option>
+        </select>
+      </div>
+
+      <div class="filter-group">
+        <div class="filter-label">Sök i batch</div>
+        <input type="text" id="searchInput" placeholder="Sök..." />
       </div>
 
       <div class="filter-group">
         <div class="filter-label">Match-filter</div>
-        <div class="filter-input-row">
-          <select id="matchFilter">
-            <option value="ALL">Alla</option>
-            <option value="OK">OK</option>
-            <option value="KOLLA">KOLLA</option>
-          </select>
-        </div>
-      </div>
-
-      <div class="filter-group">
-        <div class="filter-label">Godkänn-filter</div>
-        <div class="filter-input-row">
-          <label class="chip-check">
-            <input
-              type="checkbox"
-              class="godkann-filter"
-              value="Match"
-              checked
-            />
-            <span>Match</span>
-          </label>
-          <label class="chip-check">
-            <input
-              type="checkbox"
-              class="godkann-filter"
-              value="Godkänd"
-              checked
-            />
-            <span>Godkänd</span>
-          </label>
-          <label class="chip-check">
-            <input
-              type="checkbox"
-              class="godkann-filter"
-              value="Nekad"
-              checked
-            />
-            <span>Nekad</span>
-          </label>
-          <label class="chip-check">
-            <input
-              type="checkbox"
-              class="godkann-filter"
-              value="Ej beslutad"
-              checked
-            />
-            <span>Ej beslutad</span>
-          </label>
-        </div>
+        <select id="matchFilter">
+          <option value="ALL">Alla</option>
+          <option value="OK">OK</option>
+          <option value="KOLLA">KOLLA</option>
+        </select>
       </div>
 
       <div class="filter-group" style="margin-left:auto;">
         <div class="filter-label">Status</div>
-        <div class="filter-input-row">
-          <span id="rowCounter" class="counter">Visar 0 av 0 poster</span>
-        </div>
+        <span id="rowCounter" style="font-size:0.75rem;">Visar 0 poster</span>
       </div>
+    </div>
+
+    <div id="saveBar" class="save-bar">
+      <span style="font-size:0.85rem;font-weight:600;color:#1e40af;">Du har osparade ändringar i denna batch!</span>
+      <button id="saveBatchBtn" class="btn btn-primary">Spara Batch till databasen</button>
     </div>
 
     <div class="table-wrapper">
       <table>
         <thead>
         <tr>
-          <th style="width:44px;text-align:right;">ID</th>
-          <th style="width:90px;">Orgnr</th>
-          <th>BV: Namn</th>
-          <th>Entity: OrgName</th>
-          <th>Entity: OrgDispName</th>
+          <th style="width:100px;">Orgnr</th>
+          <th style="width:200px;">BV: Namn</th>
+          <th style="width:200px;">Entity: OrgName</th>
+          <th style="width:200px;">Entity: OrgDispName</th>
+          <th style="width:90px;">Form & SNI</th>
           <th style="width:70px;">Match</th>
-          <th style="width:220px;text-align:right;">Godkänn</th>
+          <th style="width:180px;text-align:right;">Beslut</th>
         </tr>
         </thead>
-        <tbody id="tableBody">
-        </tbody>
+        <tbody id="tableBody"></tbody>
       </table>
     </div>
 
-    <div class="table-footer">
+    <div style="margin-top:0.5rem; display:flex; justify-content:space-between;">
       <div id="syncStatus" class="status-text"></div>
       <div id="tableStatus" class="status-text"></div>
     </div>
   </section>
 </div>
 
-<!-- Modal för rad-detaljer -->
-<div id="modalBackdrop" class="modal-backdrop">
-  <div class="modal">
-    <div class="modal-header">
-      <div>
-        <div class="modal-title">Detaljer för rad</div>
-        <div id="modalBadgeContainer"></div>
-      </div>
-      <button id="modalCloseBtn" class="btn btn-ghost btn-small" type="button">
-        Stäng
-      </button>
-    </div>
-    <div class="modal-body" id="modalBody">
-      <!-- Fylls via JS -->
-    </div>
-    <div class="modal-footer">
-      <span id="copyIndicator" class="copy-indicator"></span>
-      <button id="copyBtn" class="btn btn-small" type="button">
-        Kopiera innehåll
-      </button>
-    </div>
-  </div>
-</div>
-
 <script>
   (function () {
     const API_BASE = "/api";
 
+    const batchSelect = document.getElementById("batchSelect");
     const searchInput = document.getElementById("searchInput");
     const matchFilter = document.getElementById("matchFilter");
-    const godkannFilterCheckboxes = Array.from(
-      document.querySelectorAll(".godkann-filter")
-    );
-    const rowCounter = document.getElementById("rowCounter");
     const tableBody = document.getElementById("tableBody");
+    const rowCounter = document.getElementById("rowCounter");
     const syncBtn = document.getElementById("syncBtn");
-    const exportCsvBtn = document.getElementById("exportCsvBtn");
-    const exportJsonBtn = document.getElementById("exportJsonBtn");
-    const syncStatus = document.getElementById("syncStatus");
-    const tableStatus = document.getElementById("tableStatus");
-    const activeRulesHintEl = document.getElementById("activeRulesHint");
+    const saveBar = document.getElementById("saveBar");
+    const saveBatchBtn = document.getElementById("saveBatchBtn");
+    
+    let currentRows = [];
+    let unsavedChanges = {}; // Håller koll på { orgnr: "Godkänd" | "Nekad" | "RESET" }
+    let currentBatchId = 1;
 
-    const modalBackdrop = document.getElementById("modalBackdrop");
-    const modalBody = document.getElementById("modalBody");
-    const modalBadgeContainer = document.getElementById("modalBadgeContainer");
-    const modalCloseBtn = document.getElementById("modalCloseBtn");
-    const copyBtn = document.getElementById("copyBtn");
-    const copyIndicator = document.getElementById("copyIndicator");
+    // ----- UI & RENDER ----- //
 
-    let allRows = [];
-    let rowByOrgnr = {};
-    let uiRowState = {}; // orgnr -> { mode: 'idle' | 'choose', pendingDecision: 'Godkänd'|'Nekad'|null }
-    let selectedRowForModal = null;
-    let currentRules = null; // aktiva regler från API:t
-
-    function setTableStatus(msg) {
-      tableStatus.textContent = msg || "";
-    }
-
-    function setSyncStatus(msg) {
-      syncStatus.textContent = msg || "";
-    }
-
-    function describeSourceShort(source, generic) {
-      switch (source) {
-        case "BV":
-          return "BV";
-        case "GENERIC":
-          return `GEN:"${generic || ""}"`;
-        case "CONCAT":
-          return `BV+GEN:"${generic || ""}"`;
-        default:
-          return source || "?";
+    function updateSaveBar() {
+      if (Object.keys(unsavedChanges).length > 0) {
+        saveBar.style.display = "flex";
+      } else {
+        saveBar.style.display = "none";
       }
-    }
-
-    function describeMatchShort(type) {
-      return type === "fuzzy" ? "fuzzy" : "exakt";
-    }
-
-    function updateActiveRulesHint(activeRules) {
-      if (!activeRulesHintEl) return;
-
-      if (!activeRules) {
-        activeRulesHintEl.textContent =
-          "Regler: standard (OrgName = BV/exakt, OrgDispName = BV/fuzzy)";
-        return;
-      }
-
-      const orgName = activeRules.orgName || {};
-      const orgDisp = activeRules.orgDispName || {};
-
-      const orgNameText = `${describeSourceShort(
-        orgName.source,
-        orgName.generic
-      )}/${describeMatchShort(activeRules.orgNameMatchType)}`;
-
-      const orgDispText = `${describeSourceShort(
-        orgDisp.source,
-        orgDisp.generic
-      )}/${describeMatchShort(activeRules.orgDispNameMatchType)}`;
-
-      activeRulesHintEl.textContent =
-        `Regler: OrgName = ${orgNameText}, OrgDispName = ${orgDispText}`;
-    }
-
-    function normalizeStr(str) {
-      if (!str) return "";
-      return String(str).toLowerCase();
-    }
-
-    function computeGodkannStatus(row) {
-      const match = row.match === "OK" ? "OK" : "KOLLA";
-      if (row.decision === "Godkänd") return "Godkänd";
-      if (row.decision === "Nekad") return "Nekad";
-      if (match === "OK") return "Match";
-      return "Ej beslutad";
-    }
-
-    function getRowUiState(orgnr) {
-      if (!uiRowState[orgnr]) {
-        uiRowState[orgnr] = { mode: "idle", pendingDecision: null };
-      }
-      return uiRowState[orgnr];
-    }
-
-    function clearRowUiState(orgnr) {
-      delete uiRowState[orgnr];
     }
 
     function applyFilters() {
-      const search = normalizeStr(searchInput.value);
+      const search = (searchInput.value || "").toLowerCase();
       const matchVal = matchFilter.value;
-      const selectedGodkann = new Set(
-        godkannFilterCheckboxes
-          .filter((cb) => cb.checked)
-          .map((cb) => cb.value)
-      );
 
-      return allRows.filter((row) => {
-        // Sök
+      return currentRows.filter((row) => {
         if (search) {
-          const haystack =
-            (row.orgnr || "") +
-            " " +
-            (row.bvName || "") +
-            " " +
-            (row.entityOrgName || "") +
-            " " +
-            (row.entityOrgDispName || "");
-          if (!normalizeStr(haystack).includes(search)) {
-            return false;
-          }
+          const haystack = (row.orgnr + " " + row.bvName + " " + row.entityOrgName).toLowerCase();
+          if (!haystack.includes(search)) return false;
         }
-
-        // Match-filter
-        if (matchVal !== "ALL") {
-          const m = row.match === "OK" ? "OK" : "KOLLA";
-          if (m !== matchVal) return false;
-        }
-
-        // Godkänn-filter (Match / Godkänd / Nekad / Ej beslutad)
-        const status = computeGodkannStatus(row);
-        if (!selectedGodkann.has(status)) return false;
-
+        if (matchVal !== "ALL" && row.match !== matchVal) return false;
         return true;
       });
     }
 
-    function badgeHtmlForMatch(match) {
-      const m = match === "OK" ? "OK" : "KOLLA";
-      if (m === "OK") {
-        return '<span class="badge badge-ok">OK</span>';
+    function getDecisionForRender(row) {
+      // Returnerar antingen det osparade valet, eller det från databasen
+      if (unsavedChanges[row.orgnr] !== undefined) {
+        const local = unsavedChanges[row.orgnr];
+        return local === "RESET" ? null : local;
       }
-      return '<span class="badge badge-warn">KOLLA</span>';
+      return row.decision;
     }
 
-    function renderGodkannCell(row) {
-      const ui = getRowUiState(row.orgnr);
-      const match = row.match === "OK" ? "OK" : "KOLLA";
-
-      if (ui.mode === "choose") {
-        const label = ui.pendingDecision === "Nekad" ? "Neka" : "Godkänn";
-        return (
-          '<span style="margin-right:0.4rem;font-size:0.75rem;">Val: ' +
-          label +
-          "</span>" +
-          '<button class="btn btn-small btn-ok" data-action="save" data-orgnr="' +
-          row.orgnr +
-          '">SPARA</button>' +
-          '<button class="btn btn-small btn-warn" data-action="cancel" data-orgnr="' +
-          row.orgnr +
-          '">ÅNGRA</button>'
-        );
+    function renderDecisionCell(row, decision) {
+      if (decision === "Godkänd") {
+        return `<span style="margin-right:0.4rem;font-weight:600;color:var(--ok);">Godkänd</span>
+                <button class="btn btn-small" data-action="reset" data-orgnr="${row.orgnr}">Ångra</button>`;
       }
-
-      if (row.decision === "Godkänd") {
-        return (
-          '<span style="margin-right:0.4rem;">Godkänd</span>' +
-          '<button class="btn btn-small" data-action="change" data-orgnr="' +
-          row.orgnr +
-          '">Ändra</button>'
-        );
+      if (decision === "Nekad") {
+        return `<span style="margin-right:0.4rem;font-weight:600;color:var(--warn);">Nekad</span>
+                <button class="btn btn-small" data-action="reset" data-orgnr="${row.orgnr}">Ångra</button>`;
       }
-
-      if (row.decision === "Nekad") {
-        return (
-          '<span style="margin-right:0.4rem;">Nekad</span>' +
-          '<button class="btn btn-small" data-action="change" data-orgnr="' +
-          row.orgnr +
-          '">Ändra</button>'
-        );
-      }
-
-      if (match === "OK") {
-        return (
-          '<span style="margin-right:0.4rem;">Match</span>' +
-          '<button class="btn btn-small" data-action="change" data-orgnr="' +
-          row.orgnr +
-          '">Ändra</button>'
-        );
-      }
-
-      return (
-        '<button class="btn btn-small btn-ok" data-action="approve" data-orgnr="' +
-        row.orgnr +
-        '">GODKÄNN</button>' +
-        '<button class="btn btn-small btn-warn" style="margin-left:0.25rem;" data-action="reject" data-orgnr="' +
-        row.orgnr +
-        '">NEKA</button>'
-      );
-    }
-
-    /* === Frontend-kopia av matchningslogik för att kunna markera fel fält === */
-
-    function getDefaultRules() {
-      return {
-        orgName: { source: "BV", generic: "" },
-        orgDispName: { source: "BV", generic: "" },
-        orgNameMatchType: "exact",
-        orgDispNameMatchType: "fuzzy",
-      };
-    }
-
-    function normalizeExactName(str) {
-      if (!str) return "";
-      return String(str)
-        .normalize("NFKC")
-        .replace(/\s+/g, " ")
-        .trim()
-        .toUpperCase();
-    }
-
-    function canonicalTokens(str) {
-      if (!str) return [];
-      const normalized = normalizeExactName(str)
-        .replace(/Å/g, "A")
-        .replace(/Ä/g, "A")
-        .replace(/Ö/g, "O");
-
-      const rawTokens = normalized.split(" ").filter(Boolean);
-
-      const ignoreTokens = new Set([
-        "AB",
-        "AKTIEBOLAG",
-        "KB",
-        "HB",
-        "EK",
-        "EKONOMISK",
-        "FORENING",
-        "FÖRENING",
-        "FÖRBUND",
-        "FORBUND",
-        "KOMMUN",
-        "KOMMUNER",
-        "REGION",
-        "STIFTELSE",
-        "ENHET",
-        "BOLAG",
-        "AKTIEBOLAGET",
-        "OCH",
-        "FÖR",
-        "FOR",
-        "I",
-        "AV",
-        "THE",
-      ]);
-
-      const tokens = [];
-      for (const t of rawTokens) {
-        if (!t) continue;
-        if (ignoreTokens.has(t)) continue;
-        tokens.push(t);
-      }
-      return tokens;
-    }
-
-    function fuzzyContains(actual, target) {
-      const actualTokens = canonicalTokens(actual);
-      const targetTokens = canonicalTokens(target);
-      if (!actualTokens.length || !targetTokens.length) return false;
-      const actualSet = new Set(actualTokens);
-      return targetTokens.every((t) => actualSet.has(t));
-    }
-
-    function buildTargetFromRuleFront(rule, bvValue) {
-      if (!rule) return null;
-      const generic = rule.generic || "";
-      switch (rule.source) {
-        case "GENERIC":
-          return generic || null;
-        case "CONCAT":
-          if (!bvValue && !generic) return null;
-          return String(bvValue || "") + String(generic || "");
-        case "BV":
-        default:
-          return bvValue || null;
-      }
-    }
-
-    function matchFieldFront(actual, target, type) {
-      if (!actual || !target) return false;
-      if (type === "exact") {
-        return normalizeExactName(actual) === normalizeExactName(target);
-      }
-      return fuzzyContains(actual, target);
-    }
-
-    // Returnerar { orgNameOk, orgDispOk, targetOrgName, targetOrgDisp }
-    function computeFieldMatchesForRow(row) {
-      const rules = currentRules || getDefaultRules();
-      const bvName = row.bvName;
-      const orgName = row.entityOrgName;
-      const orgDispName = row.entityOrgDispName;
-
-      const targetOrgName = buildTargetFromRuleFront(rules.orgName, bvName);
-      const targetOrgDisp = buildTargetFromRuleFront(
-        rules.orgDispName,
-        bvName
-      );
-
-      const orgNameOk = matchFieldFront(
-        orgName,
-        targetOrgName,
-        rules.orgNameMatchType
-      );
-      const orgDispOk = matchFieldFront(
-        orgDispName,
-        targetOrgDisp,
-        rules.orgDispNameMatchType
-      );
-
-      return { orgNameOk, orgDispOk, targetOrgName, targetOrgDisp };
+      return `<button class="btn btn-small btn-ok" data-action="approve" data-orgnr="${row.orgnr}">Godkänn</button>
+              <button class="btn btn-small btn-warn" data-action="reject" data-orgnr="${row.orgnr}">Neka</button>`;
     }
 
     function renderTable() {
       const filtered = applyFilters();
-      rowCounter.textContent =
-        "Visar " + filtered.length + " av " + allRows.length + " poster";
-
-      if (!filtered.length) {
-        tableBody.innerHTML =
-          '<tr><td colspan="7" style="text-align:center;color:#9ca3af;padding:0.6rem;">Inga poster matchar filtret.</td></tr>';
-        return;
-      }
-
+      rowCounter.textContent = `Visar ${filtered.length} av ${currentRows.length} i Batch ${currentBatchId}`;
+      
       let html = "";
-      let lastEntityGroup = null;
-
       for (const row of filtered) {
-        const groupKey =
-          row.entityId && row.entityId !== "null" ? row.entityId : "__" + row.orgnr;
-        const isGroupStart = groupKey !== lastEntityGroup;
-        lastEntityGroup = groupKey;
+        const decision = getDecisionForRender(row);
+        const isUnsaved = unsavedChanges[row.orgnr] !== undefined;
+        const trClass = isUnsaved ? "unsaved-row" : "";
+        
+        const matchBadge = row.match === "OK" ? '<span class="badge badge-ok">OK</span>' : '<span class="badge badge-warn">KOLLA</span>';
+        const decisionHtml = renderDecisionCell(row, decision);
+        
+        const orgNameClass = (!row.matchDetails?.orgNameOk && row.match === "KOLLA") ? 'class="mismatch-cell"' : "";
+        const dispNameClass = (!row.matchDetails?.orgDispOk && row.match === "KOLLA") ? 'class="mismatch-cell"' : "";
+        
+        const sniStr = (row.sniCodes || []).join(", ");
+        const formStr = row.formKod ? `[${row.formKod}]` : "";
+        const verksamhetHtml = `<div style="font-size:0.7rem; color:#666;" title="${sniStr}">${formStr} ${sniStr.substring(0, 15)}...</div>`;
 
-        const trClass = isGroupStart ? "group-start" : "";
-        const matchBadge = badgeHtmlForMatch(row.match);
-        const godkannHtml = renderGodkannCell(row);
-        const escapedId = String(row._id ?? "");
-        const escapedOrgnr = row.orgnr ?? "";
-        const escapedBvName = row.bvName ?? "";
-        const escapedOrgName = row.entityOrgName ?? "";
-        const escapedOrgDisp = row.entityOrgDispName ?? "";
-
-        const fm = computeFieldMatchesForRow(row);
-const isOverallOk = row.match === "OK";
-
-const orgNameClass =
-  !isOverallOk && fm && !fm.orgNameOk ? ' class="mismatch-cell"' : "";
-
-const orgDispClass =
-  !isOverallOk && fm && !fm.orgDispOk ? ' class="mismatch-cell"' : "";
-
-
-        html +=
-          '<tr class="' +
-          trClass +
-          '" data-orgnr="' +
-          escapedOrgnr +
-          '">' +
-          '<td class="id-col">' +
-          escapedId +
-          "</td>" +
-          '<td class="orgnr-col">' +
-          escapedOrgnr +
-          "</td>" +
-          "<td>" +
-          escapedBvName +
-          "</td>" +
-          "<td" +
-          orgNameClass +
-          ">" +
-          escapedOrgName +
-          "</td>" +
-          "<td" +
-          orgDispClass +
-          ">" +
-          escapedOrgDisp +
-          "</td>" +
-          "<td>" +
-          matchBadge +
-          "</td>" +
-          '<td class="actions-col">' +
-          godkannHtml +
-          "</td>" +
-          "</tr>";
+        html += `<tr class="${trClass}">
+          <td>${row.orgnr}</td>
+          <td title="${row.bvName}">${row.bvName}</td>
+          <td ${orgNameClass} title="${row.entityOrgName}">${row.entityOrgName}</td>
+          <td ${dispNameClass} title="${row.entityOrgDispName}">${row.entityOrgDispName}</td>
+          <td>${verksamhetHtml}</td>
+          <td>${matchBadge}</td>
+          <td style="text-align:right;">${decisionHtml}</td>
+        </tr>`;
       }
-
       tableBody.innerHTML = html;
+      updateSaveBar();
     }
 
-    async function fetchTable() {
-      setTableStatus("Läser in tabell...");
+    // ----- API ANROP ----- //
+
+    async function fetchTable(batchId) {
+      document.getElementById("tableStatus").textContent = "Laddar data...";
       try {
-        const res = await fetch(API_BASE + "/table", {
-          headers: { accept: "application/json" },
-        });
+        const res = await fetch(`${API_BASE}/table?batch=${batchId}`);
         if (!res.ok) throw new Error("HTTP " + res.status);
         const data = await res.json();
-        const rows = Array.isArray(data.rows) ? data.rows : [];
-        const activeRules = data.activeRules;
-
-        const lastImport = data.lastImport;
-
-// Visa regler som idag
-updateActiveRulesHint(activeRules);
-currentRules = activeRules || null;
-
-// Visa “gamla detaljerade” statusen om det finns meta
-if (lastImport && lastImport.at) {
-  const dt = new Date(lastImport.at);
-  const formatted = dt.toLocaleString("sv-SE", {
-    dateStyle: "short",
-    timeStyle: "short",
-  });
-  const processed = lastImport.processed ?? "?";
-  setSyncStatus(
-    `Senaste inläsning: ${formatted}, bearbetade ${processed} poster.`
-  );
-} else {
-  setSyncStatus("Ingen metadata-inläsning registrerad ännu.");
-}
-
-
-        rows.sort((a, b) => {
-          const aId = a.entityId || "";
-          const bId = b.entityId || "";
-          if (aId < bId) return -1;
-          if (aId > bId) return 1;
-          const aName = (a.bvName || a.orgnr || "").toUpperCase();
-          const bName = (b.bvName || b.orgnr || "").toUpperCase();
-          if (aName < bName) return -1;
-          if (aName > bName) return 1;
-          return (a.orgnr || "").localeCompare(b.orgnr || "");
-        });
-
-        rows.forEach((row, index) => {
-          row._id = index + 1;
-        });
-
-        allRows = rows;
-        rowByOrgnr = {};
-        uiRowState = {};
-        for (const row of allRows) {
-          if (row.orgnr) {
-            rowByOrgnr[row.orgnr] = row;
+        
+        currentRows = data.rows || [];
+        currentBatchId = data.currentBatch || batchId;
+        unsavedChanges = {}; // Nollställ ändringar när vi byter vy
+        
+        // Uppdatera Batch-dropdown
+        const total = data.totalBatches || 1;
+        if (batchSelect.options.length === 1 && batchSelect.options[0].value === "1") {
+          batchSelect.innerHTML = "";
+          for(let i=1; i<=total; i++) {
+            batchSelect.innerHTML += `<option value="${i}">Batch ${i}</option>`;
           }
         }
+        batchSelect.value = currentBatchId;
 
-        setTableStatus(
-          "Tabell inläst. " +
-            allRows.length +
-            " poster (exkl. meta) i VALIDATE_MD_TABLE."
-        );
+        document.getElementById("tableStatus").textContent = `Laddade Batch ${currentBatchId}`;
         renderTable();
-      } catch (err) {
-        console.error(err);
-        setTableStatus(
-          "Kunde inte läsa in tabellen. Kontrollera loggarna och försök igen."
-        );
-        allRows = [];
-        rowByOrgnr = {};
-        uiRowState = {};
-        renderTable();
+      } catch (e) {
+        document.getElementById("tableStatus").textContent = "Kunde inte ladda data.";
       }
     }
 
-    async function syncMetadata() {
-      if (
-        !confirm(
-          "VARNING: Är du säker på att du vill läsa in metadata? Inläsningen kan ta upp till 20 minuter."
-        )
-      ) {
-        return;
-      }
-
-      setSyncStatus("Startar inläsning...");
-      syncBtn.disabled = true;
-
-      let cursor = null;
-      let totalProcessed = 0;
-      let batchCount = 0;
+    async function saveBatch() {
+      if(Object.keys(unsavedChanges).length === 0) return;
+      saveBatchBtn.disabled = true;
+      saveBatchBtn.textContent = "Sparar...";
 
       try {
-        while (true) {
-          const url =
-            API_BASE +
-            "/sync-metadata" +
-            (cursor ? "?cursor=" + encodeURIComponent(cursor) : "");
-          const res = await fetch(url, {
-            method: "POST",
-            headers: { accept: "application/json" },
-          });
-          if (!res.ok) {
-            throw new Error("HTTP " + res.status);
-          }
-          const data = await res.json();
-          totalProcessed += data.processed || 0;
-          batchCount += 1;
-          setSyncStatus(
-            "Inläsning pågår... bearbetade " +
-              totalProcessed +
-              " poster i " +
-              batchCount +
-              " batchar."
-          );
-          if (data.done || !data.cursor) {
-            break;
-          }
-          cursor = data.cursor;
-        }
+        const res = await fetch(`${API_BASE}/save-batch`, {
+          method: "POST",
+          headers: { "content-type": "application/json" },
+          body: JSON.stringify({ batchId: currentBatchId, updates: unsavedChanges })
+        });
+        if(!res.ok) throw new Error("Failed to save");
+        
+        // Vid OK, hämta om batchen så vi får rätt decidedAt från databasen
+        await fetchTable(currentBatchId);
+      } catch (e) {
+        alert("Gick inte att spara. Försök igen!");
+      } finally {
+        saveBatchBtn.disabled = false;
+        saveBatchBtn.textContent = "Spara Batch till databasen";
+      }
+    }
 
-        setSyncStatus(
-          "Inläsning klar. Totalt bearbetade poster: " + totalProcessed + "."
-        );
-        await fetchTable();
-      } catch (err) {
-        console.error(err);
-        setSyncStatus(
-          "Fel vid inläsning av metadata. Kontrollera worker-loggarna."
-        );
+    async function runSyncMetadata() {
+      if (!confirm("Börja synka metadata? Detta kan ta en liten stund.")) return;
+      syncBtn.disabled = true;
+      document.getElementById("syncStatus").textContent = "Synkar batchar...";
+      try {
+        const res = await fetch(`${API_BASE}/sync-metadata`, { method: "POST" });
+        await res.json();
+        document.getElementById("syncStatus").textContent = "Synk klar!";
+        fetchTable(currentBatchId);
+      } catch (e) {
+        document.getElementById("syncStatus").textContent = "Synk misslyckades.";
       } finally {
         syncBtn.disabled = false;
       }
     }
 
-    function buildCsv(rows) {
-      const header = [
-        "ID",
-        "Orgnr",
-        "BV_Namn",
-        "Entity_OrgName",
-        "Entity_OrgDispName",
-        "EntityID",
-        "Match",
-        "Decision",
-      ];
-      const lines = [header.join(";")];
+    // ----- EVENTS ----- //
 
-      for (const row of rows) {
-        const fields = [
-          row._id ?? "",
-          row.orgnr ?? "",
-          row.bvName ?? "",
-          row.entityOrgName ?? "",
-          row.entityOrgDispName ?? "",
-          row.entityId ?? "",
-          row.match ?? "",
-          row.decision ?? "",
-        ];
-        const escaped = fields.map((v) => {
-          const s = v == null ? "" : String(v);
-          if (s.includes(";") || s.includes('"') || s.includes("\n")) {
-            return '"' + s.replace(/"/g, '""') + '"';
-          }
-          return s;
-        });
-        lines.push(escaped.join(";"));
-      }
-
-      return lines.join("\r\n");
-    }
-
-    function downloadBlob(filename, mimeType, content) {
-      const blob = new Blob([content], { type: mimeType });
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement("a");
-      a.href = url;
-      a.download = filename;
-      document.body.appendChild(a);
-      a.click();
-      document.body.removeChild(a);
-      URL.revokeObjectURL(url);
-    }
-
-    function exportCsv() {
-      const filtered = applyFilters();
-      if (!filtered.length) {
-        alert("Det finns inga poster att exportera med nuvarande filter.");
-        return;
-      }
-      const csv = buildCsv(filtered);
-      downloadBlob("validering_export.csv", "text/csv;charset=utf-8;", csv);
-    }
-
-    function exportJson() {
-      const filtered = applyFilters();
-      if (!filtered.length) {
-        alert("Det finns inga poster att exportera med nuvarande filter.");
-        return;
-      }
-      const payload = filtered.map((row) => ({
-        id: row._id ?? null,
-        orgnr: row.orgnr ?? null,
-        bvName: row.bvName ?? null,
-        entityOrgName: row.entityOrgName ?? null,
-        entityOrgDispName: row.entityOrgDispName ?? null,
-        entityId: row.entityId ?? null,
-        match: row.match ?? null,
-        decision: row.decision ?? null,
-      }));
-      const json = JSON.stringify(payload, null, 2);
-      downloadBlob(
-        "validering_export.json",
-        "application/json;charset=utf-8;",
-        json
-      );
-    }
-
-    async function saveDecision(orgnr) {
-      const ui = getRowUiState(orgnr);
-      if (!ui.pendingDecision) {
-        alert("Ingen ändring vald.");
-        return;
-      }
-      const decision = ui.pendingDecision;
-      try {
-        const res = await fetch(API_BASE + "/decision", {
-          method: "POST",
-          headers: {
-            "content-type": "application/json",
-            accept: "application/json",
-          },
-          body: JSON.stringify({ orgnr, decision }),
-        });
-        if (!res.ok) throw new Error("HTTP " + res.status);
-        const data = await res.json();
-        const row = rowByOrgnr[orgnr];
-        if (row) {
-          row.decision = data.decision;
-          row.decidedAt = data.decidedAt;
+    batchSelect.addEventListener("change", (e) => {
+      if (Object.keys(unsavedChanges).length > 0) {
+        if(!confirm("Du har osparade ändringar. Vill du byta batch ändå (ändringarna försvinner)?")) {
+          e.target.value = currentBatchId; // Gå tillbaka
+          return;
         }
-        clearRowUiState(orgnr);
-        renderTable();
-      } catch (err) {
-        console.error(err);
-        alert("Kunde inte spara beslutet. Kontrollera loggarna och försök igen.");
       }
-    }
-
-    async function resetDecision(orgnr) {
-      try {
-        const res = await fetch(API_BASE + "/decision", {
-          method: "POST",
-          headers: {
-            "content-type": "application/json",
-            accept: "application/json",
-          },
-          body: JSON.stringify({ orgnr, decision: "RESET" }),
-        });
-        if (!res.ok) throw new Error("HTTP " + res.status);
-        const data = await res.json();
-        const row = rowByOrgnr[orgnr];
-        if (row) {
-          row.decision = data.decision;
-          row.decidedAt = data.decidedAt;
-        }
-      } catch (err) {
-        console.error(err);
-        alert(
-          "Kunde inte återställa beslutet. Kontrollera loggarna och försök igen."
-        );
-      }
-    }
-
-    function modalRowHtml(label, value) {
-      return (
-        '<div class="modal-row">' +
-        '<div class="modal-label">' +
-        label +
-        "</div>" +
-        '<div class="modal-value">' +
-        (value || "") +
-        "</div>" +
-        "</div>"
-      );
-    }
-
-    function openModalForRow(row) {
-      selectedRowForModal = row;
-      if (!row) return;
-
-      const status = computeGodkannStatus(row);
-      const fm = computeFieldMatchesForRow(row);
-
-      let badgeHtml = "";
-      const matchBadge = badgeHtmlForMatch(row.match);
-      let statusBadge = "";
-      if (status === "Godkänd") {
-        statusBadge =
-          '<span class="badge badge-ok" style="margin-left:0.25rem;">Godkänd</span>';
-      } else if (status === "Nekad") {
-        statusBadge =
-          '<span class="badge badge-warn" style="margin-left:0.25rem;">Nekad</span>';
-      } else if (status === "Match") {
-        statusBadge =
-          '<span class="badge badge-neutral" style="margin-left:0.25rem;">Match</span>';
-      } else {
-        statusBadge =
-          '<span class="badge badge-neutral" style="margin-left:0.25rem;">Ej beslutad</span>';
-      }
-      badgeHtml = matchBadge + statusBadge;
-      modalBadgeContainer.innerHTML = badgeHtml;
-
-      const rules = currentRules || getDefaultRules();
-      const targetOrgName = fm.targetOrgName || "";
-      const targetOrgDisp = fm.targetOrgDisp || "";
-
-      const lines = [];
-      lines.push(modalRowHtml("ID", row._id ?? ""));
-      lines.push(modalRowHtml("Orgnr", row.orgnr ?? ""));
-      lines.push(modalRowHtml("EntityID", row.entityId ?? ""));
-      lines.push(modalRowHtml("BV: Namn", row.bvName ?? ""));
-      lines.push(modalRowHtml("Entity: OrgName", row.entityOrgName ?? ""));
-      lines.push(
-        modalRowHtml(
-          "Mål OrgName",
-          targetOrgName
-            ? `${targetOrgName} (källa: ${rules.orgName?.source || "BV"}, ${rules.orgNameMatchType || "exact"})`
-            : ""
-        )
-      );
-      lines.push(
-        modalRowHtml("Entity: OrgDispName", row.entityOrgDispName ?? "")
-      );
-      lines.push(
-        modalRowHtml(
-          "Mål OrgDispName",
-          targetOrgDisp
-            ? `${targetOrgDisp} (källa: ${rules.orgDispName?.source || "BV"}, ${rules.orgDispNameMatchType || "fuzzy"})`
-            : ""
-        )
-      );
-      lines.push(modalRowHtml("Match", row.match ?? ""));
-      lines.push(modalRowHtml("Godkänn", status));
-
-      modalBody.innerHTML = lines.join("");
-      copyIndicator.textContent = "";
-      modalBackdrop.classList.add("show");
-    }
-
-    function closeModal() {
-      modalBackdrop.classList.remove("show");
-      selectedRowForModal = null;
-    }
-
-    async function copyModalContent() {
-      if (!selectedRowForModal) return;
-      const row = selectedRowForModal;
-      const status = computeGodkannStatus(row);
-      const fm = computeFieldMatchesForRow(row);
-      const rules = currentRules || getDefaultRules();
-
-      const targetOrgName = fm.targetOrgName || "";
-      const targetOrgDisp = fm.targetOrgDisp || "";
-
-      const parts = [
-        "ID: " + (row._id ?? ""),
-        "Orgnr: " + (row.orgnr ?? ""),
-        "EntityID: " + (row.entityId ?? ""),
-        "BV: Namn: " + (row.bvName ?? ""),
-        "Entity: OrgName: " + (row.entityOrgName ?? ""),
-        targetOrgName
-          ? `Mål OrgName: ${targetOrgName} (källa: ${
-              rules.orgName?.source || "BV"
-            }, ${rules.orgNameMatchType || "exact"})`
-          : "",
-        "Entity: OrgDispName: " + (row.entityOrgDispName ?? ""),
-        targetOrgDisp
-          ? `Mål OrgDispName: ${targetOrgDisp} (källa: ${
-              rules.orgDispName?.source || "BV"
-            }, ${rules.orgDispNameMatchType || "fuzzy"})`
-          : "",
-        "Match: " + (row.match ?? ""),
-        "Godkänn: " + status,
-      ].filter(Boolean);
-
-      const text = parts.join("\n");
-      try {
-        if (navigator.clipboard && navigator.clipboard.writeText) {
-          await navigator.clipboard.writeText(text);
-        } else {
-          const ta = document.createElement("textarea");
-          ta.value = text;
-          document.body.appendChild(ta);
-          ta.select();
-          document.execCommand("copy");
-          document.body.removeChild(ta);
-        }
-        copyIndicator.textContent = "Kopierat!";
-        setTimeout(() => {
-          copyIndicator.textContent = "";
-        }, 1500);
-      } catch (err) {
-        console.error(err);
-        alert("Kunde inte kopiera till urklipp.");
-      }
-    }
-
-    // Event-lyssnare
-    searchInput.addEventListener("input", () => renderTable());
-    matchFilter.addEventListener("change", () => renderTable());
-    godkannFilterCheckboxes.forEach((cb) =>
-      cb.addEventListener("change", () => renderTable())
-    );
-
-    tableBody.addEventListener("click", (event) => {
-      const btn = event.target.closest("button");
-      const tr = event.target.closest("tr[data-orgnr]");
-      if (!tr) return;
-      const orgnr = tr.getAttribute("data-orgnr");
-      const row = rowByOrgnr[orgnr];
-      if (!row) return;
-
-      if (btn) {
-        event.stopPropagation();
-        const action = btn.getAttribute("data-action");
-        if (action === "approve") {
-          const ui = getRowUiState(orgnr);
-          ui.mode = "choose";
-          ui.pendingDecision = "Godkänd";
-          renderTable();
-        } else if (action === "reject") {
-          const ui = getRowUiState(orgnr);
-          ui.mode = "choose";
-          ui.pendingDecision = "Nekad";
-          renderTable();
-        } else if (action === "save") {
-          saveDecision(orgnr);
-        } else if (action === "cancel") {
-          const ui = getRowUiState(orgnr);
-          ui.mode = "idle";
-          ui.pendingDecision = null;
-          renderTable();
-        } else if (action === "change") {
-          if (row.decision) {
-            resetDecision(orgnr).then(() => {
-              const r = rowByOrgnr[orgnr];
-              if (r) {
-                const ui2 = getRowUiState(orgnr);
-                ui2.mode = "choose";
-                ui2.pendingDecision = null;
-                renderTable();
-              }
-            });
-          } else {
-            const ui = getRowUiState(orgnr);
-            ui.mode = "choose";
-            ui.pendingDecision = null;
-            renderTable();
-          }
-        }
-        return;
-      }
-
-      openModalForRow(row);
+      fetchTable(e.target.value);
     });
 
-    syncBtn.addEventListener("click", syncMetadata);
-    exportCsvBtn.addEventListener("click", exportCsv);
-    exportJsonBtn.addEventListener("click", exportJson);
+    searchInput.addEventListener("input", renderTable);
+    matchFilter.addEventListener("change", renderTable);
+    syncBtn.addEventListener("click", runSyncMetadata);
+    saveBatchBtn.addEventListener("click", saveBatch);
 
-    modalCloseBtn.addEventListener("click", closeModal);
-    modalBackdrop.addEventListener("click", (e) => {
-      if (e.target === modalBackdrop) {
-        closeModal();
-      }
+    tableBody.addEventListener("click", (e) => {
+      const btn = e.target.closest("button");
+      if (!btn) return;
+      const action = btn.getAttribute("data-action");
+      const orgnr = btn.getAttribute("data-orgnr");
+
+      if (action === "approve") unsavedChanges[orgnr] = "Godkänd";
+      else if (action === "reject") unsavedChanges[orgnr] = "Nekad";
+      else if (action === "reset") unsavedChanges[orgnr] = "RESET";
+      
+      renderTable();
     });
-    copyBtn.addEventListener("click", copyModalContent);
 
-    // Init
-    fetchTable();
+    // INIT
+    fetchTable(1);
   })();
 </script>
 </body>
