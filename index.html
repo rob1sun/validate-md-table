@@ -38,7 +38,6 @@
     tbody tr:hover td {background:#f9fafb}
     td.id-col {text-align:right;color:var(--muted);font-variant-numeric:tabular-nums;}
     
-    /* NYTT: Styling för orgnr-länken */
     .org-link {color: var(--accent); text-decoration: none; font-weight: 600; display: inline-block;}
     .org-link:hover {text-decoration: underline; color: #1d4ed8;}
 
@@ -230,6 +229,7 @@
       const decision = getDecisionForRender(row);
       const match = row.match === "OK" ? "OK" : "KOLLA";
 
+      // LÄGE 1: Bekräfta valet (SPARA/ÅNGRA)
       if (ui.mode === "choose") {
         const label = ui.pendingDecision === "Nekad" ? "Neka" : "Godkänn";
         return `<span style="margin-right:0.4rem;font-size:0.75rem;">Val: ${label}</span>
@@ -237,6 +237,14 @@
                 <button class="btn btn-small btn-warn" data-action="cancel" data-orgnr="${row.orgnr}">ÅNGRA</button>`;
       }
 
+      // LÄGE 2: Användaren klickade "Ändra" - Visa Godkänn/Neka igen!
+      if (ui.mode === "edit") {
+        return `<button class="btn btn-small btn-ok" data-action="approve" data-orgnr="${row.orgnr}">GODKÄNN</button>
+                <button class="btn btn-small btn-warn" style="margin-left:0.25rem;" data-action="reject" data-orgnr="${row.orgnr}">NEKA</button>
+                <button class="btn btn-small btn-ghost" style="margin-left:0.25rem;" data-action="cancel" data-orgnr="${row.orgnr}">Avbryt</button>`;
+      }
+
+      // LÄGE 3: Redan beslutat
       if (decision === "Godkänd" || decision === "Nekad") {
         const isUnsaved = unsavedChanges[row.orgnr] !== undefined && unsavedChanges[row.orgnr] !== "RESET";
         const color = decision === "Godkänd" ? "var(--ok)" : "var(--warn)";
@@ -245,11 +253,13 @@
                 <button class="btn btn-small" data-action="change" data-orgnr="${row.orgnr}">Ändra</button>`;
       }
 
+      // LÄGE 4: Automatisk Match
       if (match === "OK") {
         return `<span style="margin-right:0.4rem;">Match</span>
                 <button class="btn btn-small" data-action="change" data-orgnr="${row.orgnr}">Ändra</button>`;
       }
 
+      // LÄGE 5: Default (inget valt än, och inte Match)
       return `<button class="btn btn-small btn-ok" data-action="approve" data-orgnr="${row.orgnr}">GODKÄNN</button>
               <button class="btn btn-small btn-warn" style="margin-left:0.25rem;" data-action="reject" data-orgnr="${row.orgnr}">NEKA</button>`;
     }
@@ -266,7 +276,6 @@
         const matchBadge = row.match === "OK" ? '<span class="badge badge-ok">OK</span>' : '<span class="badge badge-warn">KOLLA</span>';
         const decisionHtml = renderDecisionCell(row);
         
-        // RÖDA CELLER
         const orgNameClass = (!row.matchDetails?.orgNameOk && row.match === "KOLLA") ? 'class="mismatch-cell"' : "";
         const dispNameClass = (!row.matchDetails?.orgDispOk && row.match === "KOLLA") ? 'class="mismatch-cell"' : "";
         const sniClass = (!row.matchDetails?.sniFormOk && row.match === "KOLLA") ? 'class="mismatch-cell"' : "";
@@ -275,7 +284,6 @@
         const formStr = row.formKod ? `[${row.formKod}]` : "";
         const verksamhetHtml = `<div style="font-size:0.7rem;" title="${sniStr}">${formStr} ${sniStr.substring(0, 15)}...</div>`;
         
-        // NYTT: Orgnr som länk
         const orgLinkHtml = `<a href="https://www.allabolag.se/bransch-s%C3%B6k?q=${row.orgnr}" target="_blank" class="org-link">${row.orgnr}</a>`;
 
         html += `<tr class="${trClass}" data-orgnr="${row.orgnr}">
@@ -333,7 +341,7 @@
       
       lines.push(`<div class="modal-section-title">Verksamhet (SNI & Form)</div>`);
       lines.push(modalRowHtml("Organisationens Form", row.formKod));
-      lines.push(modalRowHtml("Vitlistade Former", allForms || "(Inga krav)")); // Ändrad till Vitlistade
+      lines.push(modalRowHtml("Vitlistade Former", allForms || "(Inga krav)"));
       lines.push(modalRowHtml("Organisationens SNI", (row.sniCodes || []).join(", ")));
       lines.push(modalRowHtml("Tillåtna SNI-prefix", reqSni || "(Inga krav)"));
 
@@ -460,7 +468,6 @@
     modalBackdrop.addEventListener("click", (e) => { if (e.target === modalBackdrop) modalBackdrop.classList.remove("show"); });
 
     tableBody.addEventListener("click", (e) => {
-      // NYTT: Om klicket är på orgnr-länken, låt webbläsaren hantera det och avbryt modal-öppningen
       if (e.target.closest(".org-link")) {
         e.stopPropagation();
         return;
@@ -481,12 +488,14 @@
         } else if (action === "reject") {
           uiRowState[orgnr].mode = "choose"; uiRowState[orgnr].pendingDecision = "Nekad";
         } else if (action === "cancel") {
+          // Gå tillbaka till normalläget
           uiRowState[orgnr].mode = "idle"; uiRowState[orgnr].pendingDecision = null;
         } else if (action === "save-local") {
           unsavedChanges[orgnr] = uiRowState[orgnr].pendingDecision;
           uiRowState[orgnr].mode = "idle";
         } else if (action === "change") {
-          uiRowState[orgnr].mode = "choose"; uiRowState[orgnr].pendingDecision = null;
+          // NYTT LÄGE: Användaren vill ändra -> visa Godkänn/Neka knapparna
+          uiRowState[orgnr].mode = "edit"; uiRowState[orgnr].pendingDecision = null;
         } else if (action === "reset") {
           unsavedChanges[orgnr] = "RESET"; uiRowState[orgnr].mode = "idle";
         }
