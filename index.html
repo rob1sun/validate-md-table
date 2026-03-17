@@ -287,10 +287,16 @@
         
         const orgLinkHtml = `<a href="https://www.allabolag.se/bransch-s%C3%B6k?q=${row.orgnr}" target="_blank" class="org-link">${row.orgnr}</a>`;
 
+        // NYTT: Rita ut en röd varningsbricka om bolaget har en kritisk status
+        let bvNameDisplay = row.bvName || "";
+        if (row.bvStatus) {
+            bvNameDisplay += `<br><span class="badge badge-warn" style="font-size:0.65rem; padding:0.1rem 0.35rem; margin-top:0.2rem;">${row.bvStatus}</span>`;
+        }
+
         html += `<tr class="${trClass}" data-orgnr="${row.orgnr}">
           <td class="id-col">${row._id}</td>
           <td>${orgLinkHtml}</td>
-          <td>${row.bvName}</td>
+          <td>${bvNameDisplay}</td>
           <td ${orgNameClass}>${row.entityOrgName}</td>
           <td ${dispNameClass}>${row.entityOrgDispName}</td>
           <td ${sniClass}>${verksamhetHtml}</td>
