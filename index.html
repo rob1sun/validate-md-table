@@ -372,6 +372,10 @@ function renderNestedData(obj) {
       lines.push(modalRowHtml("EntityID", row.entityId));
       lines.push(modalRowHtml("Godkännandestatus", status));
 
+      if (row.bvStatus) {
+        lines.push(modalRowHtml("Bolagsstatus", `<span style="color:var(--warn); font-weight:700;">${row.bvStatus}</span>`));
+      }
+
       lines.push(`<div class="modal-section-title">Namnmatchning</div>`);
       lines.push(modalRowHtml("BV: Namn", row.bvName));
       lines.push(modalRowHtml("Entity: OrgName", row.entityOrgName));
