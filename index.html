@@ -160,7 +160,7 @@
   </div>
 </div>
 
-<script>
+  <script>
   (function () {
     const API_BASE = "/api";
 
@@ -183,6 +183,7 @@
     let currentRows = [];
     let activeRules = {}; 
     let unsavedChanges = {}; 
+    let unsavedComments = {}; // NYTT: Håller koll på osparade kommentarer
     let uiRowState = {}; 
     let currentBatchId = "1";
     let totalBatchesCount = 1;
@@ -190,7 +191,9 @@
     // ----- UI & RENDER ----- //
 
     function updateSaveBar() {
-      saveBar.style.display = Object.keys(unsavedChanges).length > 0 ? "flex" : "none";
+      // Visa spara-listen om det finns osparade beslut ELLER osparade kommentarer
+      const hasChanges = Object.keys(unsavedChanges).length > 0 || Object.keys(unsavedComments).length > 0;
+      saveBar.style.display = hasChanges ? "flex" : "none";
     }
 
     function getDecisionForRender(row) {
@@ -273,8 +276,9 @@
       
       let html = "";
       for (const row of filtered) {
-        const isUnsaved = unsavedChanges[row.orgnr] !== undefined;
-        const trClass = isUnsaved ? "unsaved-row" : "";
+        const isUnsavedDecision = unsavedChanges[row.orgnr] !== undefined;
+        const isUnsavedComment = unsavedComments[row.orgnr] !== undefined;
+        const trClass = (isUnsavedDecision || isUnsavedComment) ? "unsaved-row" : "";
         const matchBadge = row.match === "OK" ? '<span class="badge badge-ok">OK</span>' : '<span class="badge badge-warn">KOLLA</span>';
         const decisionHtml = renderDecisionCell(row);
         
@@ -288,10 +292,17 @@
         
         const orgLinkHtml = `<a href="https://www.allabolag.se/bransch-s%C3%B6k?q=${row.orgnr}" target="_blank" class="org-link">${row.orgnr}</a>`;
 
-        // NYTT: Rita ut en röd varningsbricka om bolaget har en kritisk status
         let bvNameDisplay = row.bvName || "";
+        
+        // Röd varningsbricka för döda bolag
         if (row.bvStatus) {
             bvNameDisplay += `<br><span class="badge badge-warn" style="font-size:0.65rem; padding:0.1rem 0.35rem; margin-top:0.2rem;">${row.bvStatus}</span>`;
+        }
+        
+        // Gul varningsbricka om det finns en kommentar
+        const activeComment = unsavedComments[row.orgnr] !== undefined ? unsavedComments[row.orgnr] : (row.comment || "");
+        if (activeComment) {
+            bvNameDisplay += `<br><span class="badge badge-yellow" style="font-size:0.65rem; padding:0.1rem 0.35rem; margin-top:0.2rem;">📝 Notering</span>`;
         }
 
         html += `<tr class="${trClass}" data-orgnr="${row.orgnr}">
@@ -314,13 +325,12 @@
       return `<div class="modal-row"><div class="modal-label">${label}</div><div class="modal-value">${value || ""}</div></div>`;
     }
 
-function renderNestedData(obj) {
+    function renderNestedData(obj) {
       if (!obj || typeof obj !== 'object') return String(obj);
       let html = "";
       for (const [k, v] of Object.entries(obj)) {
         if (v === null || v === "" || (Array.isArray(v) && v.length === 0)) continue;
         
-        // Formatera nyckeln snyggt (t.ex. "organisationsnamnLista" -> "ORGANISATIONSNAMNLISTA")
         const cleanKey = k.replace(/([A-Z])/g, ' $1').trim();
         
         if (Array.isArray(v)) {
@@ -368,11 +378,34 @@ function renderNestedData(obj) {
       const allForms = (sniConf.allowedForms || []).join(", ");
 
       const lines = [];
+
+      // UI FÖR KOMMENTARER
+      const activeComment = unsavedComments[row.orgnr] !== undefined ? unsavedComments[row.orgnr] : (row.comment || "");
+      if (activeComment) {
+        lines.push(`
+          <div style="background:#fefce8; border:1px solid #fef08a; padding:0.6rem; border-radius:0.5rem; margin-bottom:1rem;">
+            <div style="display:flex; justify-content:space-between; align-items:flex-start; gap:1rem;">
+              <div style="font-size:0.8rem; color:#854d0e; word-break:break-word;">
+                <span style="font-weight:600; display:block; margin-bottom:0.2rem;">📝 Kommentar:</span>
+                ${activeComment}
+              </div>
+              <button class="btn btn-small" style="background:#fde047; border-color:#facc15; color:#854d0e; flex-shrink:0;" id="btnEditComment">Redigera</button>
+            </div>
+          </div>
+        `);
+      } else {
+        lines.push(`
+          <div style="margin-bottom:1rem;">
+            <button class="btn btn-small" style="background:#fefce8; border-color:#fde047; color:#854d0e;" id="btnAddComment">📝 Lägg till kommentar</button>
+          </div>
+        `);
+      }
+
       lines.push(`<div class="modal-section-title" style="margin-top:0;">Allmänt</div>`);
       lines.push(modalRowHtml("ID / Orgnr", `${row._id} / ${row.orgnr}`));
       lines.push(modalRowHtml("EntityID", row.entityId));
       lines.push(modalRowHtml("Godkännandestatus", status));
-
+      
       if (row.bvStatus) {
         lines.push(modalRowHtml("Bolagsstatus", `<span style="color:var(--warn); font-weight:700;">${row.bvStatus}</span>`));
       }
@@ -390,7 +423,6 @@ function renderNestedData(obj) {
       lines.push(modalRowHtml("Organisationens SNI", (row.sniCodes || []).join(", ")));
       lines.push(modalRowHtml("Tillåtna SNI-prefix", reqSni || "(Inga krav)"));
 
-      // HÄR BYGGER VI DEN NYA DATACONTAINERN UTAN MAX-HEIGHT
       lines.push(`<div class="modal-section-title" style="margin-top:1rem; padding-top:1rem; border-top:1px dashed #d1d5db;">Bolagsverket komplett data</div>`);
       lines.push(`<button id="btnFetchRawBv" class="btn btn-ghost btn-small" style="margin-top:0.3rem; border:1px solid var(--chip-border);">Hämta komplett data</button>`);
       lines.push(`<div id="rawBvDataContainer" style="display:none; padding-top:0.5rem; padding-bottom:1rem;"></div>`);
@@ -398,7 +430,24 @@ function renderNestedData(obj) {
       modalBody.innerHTML = lines.join("");
       modalBackdrop.classList.add("show");
 
-      // Bind event-lyssnare till knappen
+      // EVENTLYSSNARE FÖR KOMMENTARER
+      const handleComment = () => {
+        const current = unsavedComments[row.orgnr] !== undefined ? unsavedComments[row.orgnr] : (row.comment || "");
+        let text = prompt("Skriv en kort kommentar (max 150 tecken).\nLämna rutan helt tom för att radera kommentaren:", current);
+        if (text !== null) {
+          text = text.trim().substring(0, 150);
+          unsavedComments[row.orgnr] = text;
+          renderTable(); 
+          openModalForRow(row.orgnr); 
+        }
+      };
+
+      const btnEdit = document.getElementById("btnEditComment");
+      const btnAdd = document.getElementById("btnAddComment");
+      if (btnEdit) btnEdit.addEventListener("click", handleComment);
+      if (btnAdd) btnAdd.addEventListener("click", handleComment);
+
+      // EVENTLYSSNARE FÖR RÅDATA
       const btnFetchRaw = document.getElementById("btnFetchRawBv");
       const rawContainer = document.getElementById("rawBvDataContainer");
       
@@ -422,10 +471,7 @@ function renderNestedData(obj) {
           }
 
           if (foundData) {
-            // Om bolagsverket har returnerat ett objekt i "data.organisationer[0]" så använder vi det i första hand, annars hela objektet
             const bvData = (foundData.data && foundData.data.organisationer) ? foundData.data.organisationer[0] : foundData;
-            
-            // Kör datan genom vår nya strukturerade HTML-byggare
             rawContainer.innerHTML = renderNestedData(bvData);
             rawContainer.style.display = "block";
             btnFetchRaw.style.display = "none";
@@ -440,11 +486,13 @@ function renderNestedData(obj) {
 
     // ----- EXPORT CSV ----- //
     function buildCsv(rows) {
-      const header = ["ID", "Orgnr", "BV_Namn", "Entity_OrgName", "Entity_OrgDispName", "Juridisk_Form", "SNI_Koder", "Match_Status", "Beslut"];
+      const header = ["ID", "Orgnr", "BV_Namn", "Entity_OrgName", "Entity_OrgDispName", "Juridisk_Form", "SNI_Koder", "Match_Status", "Beslut", "Kommentar"];
       const lines = [header.join(";")];
 
       for (const row of rows) {
         const status = computeGodkannStatus(row);
+        const comment = unsavedComments[row.orgnr] !== undefined ? unsavedComments[row.orgnr] : (row.comment || "");
+        
         const fields = [
           row._id || "",
           row.orgnr || "",
@@ -454,7 +502,8 @@ function renderNestedData(obj) {
           row.formKod || "",
           (row.sniCodes || []).join(", "),
           row.match || "",
-          status
+          status,
+          comment
         ];
         
         const escaped = fields.map((v) => {
@@ -494,9 +543,10 @@ function renderNestedData(obj) {
         currentRows = data.rows || [];
         activeRules = data.activeRules || {};
         currentBatchId = data.currentBatch || batchId;
-        totalBatchesCount = data.totalBatches || 1; // Spara detta globalt för modal-anropen!
+        totalBatchesCount = data.totalBatches || 1; 
         
         unsavedChanges = {}; 
+        unsavedComments = {}; // Nollställ osparade kommentarer vid vy-byte
         uiRowState = {};
         
         currentRows.sort((a, b) => (a.orgnr || "").localeCompare(b.orgnr || ""));
@@ -517,15 +567,30 @@ function renderNestedData(obj) {
     }
 
     async function saveBatch() {
-      if(Object.keys(unsavedChanges).length === 0) return;
+      if(Object.keys(unsavedChanges).length === 0 && Object.keys(unsavedComments).length === 0) return;
       saveBatchBtn.disabled = true;
       saveBatchBtn.textContent = "Sparar...";
+
+      // Bygg payload med både beslut och kommentarer
+      const updates = {};
+      const allModified = new Set([...Object.keys(unsavedChanges), ...Object.keys(unsavedComments)]);
+      
+      allModified.forEach(orgnr => {
+        updates[orgnr] = {};
+        if (unsavedChanges[orgnr] !== undefined) {
+          if (unsavedChanges[orgnr] === "RESET") updates[orgnr].reset = true;
+          else updates[orgnr].decision = unsavedChanges[orgnr];
+        }
+        if (unsavedComments[orgnr] !== undefined) {
+          updates[orgnr].comment = unsavedComments[orgnr];
+        }
+      });
 
       try {
         const res = await fetch(`${API_BASE}/save-batch`, {
           method: "POST",
           headers: { "content-type": "application/json" },
-          body: JSON.stringify({ batchId: currentBatchId, updates: unsavedChanges })
+          body: JSON.stringify({ batchId: currentBatchId, updates })
         });
         if(!res.ok) throw new Error("Failed to save");
         await fetchTable(currentBatchId);
@@ -540,7 +605,7 @@ function renderNestedData(obj) {
    async function runSyncMetadata() {
       const msg = "Börja synka metadata?\n\nOBS! Detta uppdaterar tabellerna. Om någon annan i teamet sitter och klickar på 'Spara ändringar' exakt just nu, kan deras senaste beslut skrivas över.\n\nSäg till teamet att vänta i 10 sekunder innan du klickar OK.";
       
-      if (!confirm(msg)) return; // Om användaren klickar Avbryt, stannar vi här
+      if (!confirm(msg)) return; 
       
       syncBtn.disabled = true;
       document.getElementById("syncStatus").textContent = "Synkar batchar...";
@@ -559,7 +624,7 @@ function renderNestedData(obj) {
 
     // ----- EVENTS ----- //
     batchSelect.addEventListener("change", (e) => {
-      if (Object.keys(unsavedChanges).length > 0) {
+      if (Object.keys(unsavedChanges).length > 0 || Object.keys(unsavedComments).length > 0) {
         if(!confirm("Du har osparade ändringar. Vill du byta vy ändå (ändringarna försvinner)?")) {
           e.target.value = currentBatchId; 
           return;
@@ -599,13 +664,11 @@ function renderNestedData(obj) {
         } else if (action === "reject") {
           uiRowState[orgnr].mode = "choose"; uiRowState[orgnr].pendingDecision = "Nekad";
         } else if (action === "cancel") {
-          // Gå tillbaka till normalläget
           uiRowState[orgnr].mode = "idle"; uiRowState[orgnr].pendingDecision = null;
         } else if (action === "save-local") {
           unsavedChanges[orgnr] = uiRowState[orgnr].pendingDecision;
           uiRowState[orgnr].mode = "idle";
         } else if (action === "change") {
-          // NYTT LÄGE: Användaren vill ändra -> visa Godkänn/Neka knapparna
           uiRowState[orgnr].mode = "edit"; uiRowState[orgnr].pendingDecision = null;
         } else if (action === "reset") {
           unsavedChanges[orgnr] = "RESET"; uiRowState[orgnr].mode = "idle";
@@ -620,5 +683,6 @@ function renderNestedData(obj) {
     fetchTable("1");
   })();
 </script>
+
 </body>
 </html>
