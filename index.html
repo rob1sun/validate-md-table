@@ -307,6 +307,39 @@
       return `<div class="modal-row"><div class="modal-label">${label}</div><div class="modal-value">${value || ""}</div></div>`;
     }
 
+function renderNestedData(obj) {
+      if (!obj || typeof obj !== 'object') return String(obj);
+      let html = "";
+      for (const [k, v] of Object.entries(obj)) {
+        if (v === null || v === "" || (Array.isArray(v) && v.length === 0)) continue;
+        
+        // Formatera nyckeln snyggt (t.ex. "organisationsnamnLista" -> "ORGANISATIONSNAMNLISTA")
+        const cleanKey = k.replace(/([A-Z])/g, ' $1').trim();
+        
+        if (Array.isArray(v)) {
+           html += `<div style="margin-top:0.5rem;"><div style="font-weight:600; color:#4b5563; font-size:0.7rem; text-transform:uppercase; letter-spacing:0.05em;">${cleanKey}</div>`;
+           v.forEach(item => {
+             if (typeof item === 'object') {
+               html += `<div style="margin-left:0.2rem; padding-left:0.6rem; border-left:2px solid #e5e7eb; margin-top:0.2rem;">${renderNestedData(item)}</div>`;
+             } else {
+               html += `<div style="margin-left:0.8rem; padding:0.1rem 0;">${item}</div>`;
+             }
+           });
+           html += `</div>`;
+        } else if (typeof v === 'object') {
+           html += `<div style="margin-top:0.5rem;"><div style="font-weight:600; color:#4b5563; font-size:0.7rem; text-transform:uppercase; letter-spacing:0.05em;">${cleanKey}</div>`;
+           html += `<div style="margin-left:0.2rem; padding-left:0.6rem; border-left:2px solid #e5e7eb; margin-top:0.2rem;">${renderNestedData(v)}</div>`;
+           html += `</div>`;
+        } else {
+           html += `<div class="modal-row" style="border-bottom:none; padding:0.15rem 0;">
+                      <div class="modal-label" style="width:140px; font-size:0.75rem;">${cleanKey}</div>
+                      <div class="modal-value" style="color:#111827; font-size:0.8rem;">${v}</div>
+                    </div>`;
+        }
+      }
+      return html;
+    }
+
     function openModalForRow(orgnr) {
       const row = currentRows.find(r => r.orgnr === orgnr);
       if (!row) return;
@@ -346,15 +379,15 @@
       lines.push(modalRowHtml("Organisationens SNI", (row.sniCodes || []).join(", ")));
       lines.push(modalRowHtml("Tillåtna SNI-prefix", reqSni || "(Inga krav)"));
 
-      // LÄGG TILL KNAPP FÖR ATT HÄMTA BOLAGSVERKETS RÅDATA
-      lines.push(`<div class="modal-section-title">Bolagsverket komplett data</div>`);
+      // HÄR BYGGER VI DEN NYA DATACONTAINERN UTAN MAX-HEIGHT
+      lines.push(`<div class="modal-section-title" style="margin-top:1rem; padding-top:1rem; border-top:1px dashed #d1d5db;">Bolagsverket komplett data</div>`);
       lines.push(`<button id="btnFetchRawBv" class="btn btn-ghost btn-small" style="margin-top:0.3rem; border:1px solid var(--chip-border);">Hämta komplett data</button>`);
-      lines.push(`<pre id="rawBvDataContainer" style="display:none; background:#f9fafb; padding:0.6rem; border-radius:0.5rem; overflow-x:auto; font-size:0.75rem; border:1px solid #e5e7eb; margin-top:0.5rem; max-height:250px; color:#374151;"></pre>`);
+      lines.push(`<div id="rawBvDataContainer" style="display:none; padding-top:0.5rem; padding-bottom:1rem;"></div>`);
 
       modalBody.innerHTML = lines.join("");
       modalBackdrop.classList.add("show");
 
-      // Bind event-lyssnare till den nya knappen i modalen
+      // Bind event-lyssnare till knappen
       const btnFetchRaw = document.getElementById("btnFetchRawBv");
       const rawContainer = document.getElementById("rawBvDataContainer");
       
@@ -363,8 +396,6 @@
         btnFetchRaw.textContent = "Hämtar data...";
 
         try {
-          // Om vi är i "Alla batchar" så vet vi inte vilken batch bolaget tillhör. 
-          // Vi testar oss fram genom alla batchar (snabb loop)!
           const batchesToTry = currentBatchId === "ALL" 
             ? Array.from({length: totalBatchesCount}, (_, i) => i + 1) 
             : [currentBatchId];
@@ -375,12 +406,16 @@
             const res = await fetch(`${API_BASE}/bv-raw?orgnr=${row.orgnr}&batch=${b}`);
             if (res.ok) {
               foundData = await res.json();
-              break; // Hittade datan, avbryt loopen
+              break; 
             }
           }
 
           if (foundData) {
-            rawContainer.textContent = JSON.stringify(foundData, null, 2);
+            // Om bolagsverket har returnerat ett objekt i "data.organisationer[0]" så använder vi det i första hand, annars hela objektet
+            const bvData = (foundData.data && foundData.data.organisationer) ? foundData.data.organisationer[0] : foundData;
+            
+            // Kör datan genom vår nya strukturerade HTML-byggare
+            rawContainer.innerHTML = renderNestedData(bvData);
             rawContainer.style.display = "block";
             btnFetchRaw.style.display = "none";
           } else {
