@@ -438,4 +438,141 @@
     }
 
     // ----- API ANROP ----- //
-    async function fetchTable(batchId
+    async function fetchTable(batchId) {
+      document.getElementById("tableStatus").textContent = "Laddar data...";
+      try {
+        const res = await fetch(`${API_BASE}/table?batch=${batchId}`);
+        if (!res.ok) throw new Error("HTTP " + res.status);
+        const data = await res.json();
+        
+        currentRows = data.rows || [];
+        activeRules = data.activeRules || {};
+        currentBatchId = data.currentBatch || batchId;
+        totalBatchesCount = data.totalBatches || 1; // Spara detta globalt för modal-anropen!
+        
+        unsavedChanges = {}; 
+        uiRowState = {};
+        
+        currentRows.sort((a, b) => (a.orgnr || "").localeCompare(b.orgnr || ""));
+        currentRows.forEach((row, index) => { row._id = index + 1; });
+        
+        if (batchSelect.options.length === 1 && batchSelect.options[0].value === "1") {
+          batchSelect.innerHTML = "";
+          for(let i=1; i<=totalBatchesCount; i++) batchSelect.innerHTML += `<option value="${i}">Batch ${i}</option>`;
+          if(totalBatchesCount > 1) batchSelect.innerHTML += `<option value="ALL">Alla batchar (Fullständig lista)</option>`;
+        }
+        batchSelect.value = currentBatchId;
+
+        document.getElementById("tableStatus").textContent = `Laddade vy: ${currentBatchId === "ALL" ? "Alla batchar" : "Batch "+currentBatchId}`;
+        renderTable();
+      } catch (e) {
+        document.getElementById("tableStatus").textContent = "Kunde inte ladda data.";
+      }
+    }
+
+    async function saveBatch() {
+      if(Object.keys(unsavedChanges).length === 0) return;
+      saveBatchBtn.disabled = true;
+      saveBatchBtn.textContent = "Sparar...";
+
+      try {
+        const res = await fetch(`${API_BASE}/save-batch`, {
+          method: "POST",
+          headers: { "content-type": "application/json" },
+          body: JSON.stringify({ batchId: currentBatchId, updates: unsavedChanges })
+        });
+        if(!res.ok) throw new Error("Failed to save");
+        await fetchTable(currentBatchId);
+      } catch (e) {
+        alert("Gick inte att spara. Försök igen!");
+      } finally {
+        saveBatchBtn.disabled = false;
+        saveBatchBtn.textContent = "Spara ändringar till databasen";
+      }
+    }
+
+   async function runSyncMetadata() {
+      const msg = "Börja synka metadata?\n\nOBS! Detta uppdaterar tabellerna. Om någon annan i teamet sitter och klickar på 'Spara ändringar' exakt just nu, kan deras senaste beslut skrivas över.\n\nSäg till teamet att vänta i 10 sekunder innan du klickar OK.";
+      
+      if (!confirm(msg)) return; // Om användaren klickar Avbryt, stannar vi här
+      
+      syncBtn.disabled = true;
+      document.getElementById("syncStatus").textContent = "Synkar batchar...";
+      try {
+        const res = await fetch(`${API_BASE}/sync-metadata`, { method: "POST" });
+        if (!res.ok) throw new Error("Något gick fel");
+        await res.json();
+        document.getElementById("syncStatus").textContent = "Synk klar!";
+        fetchTable(currentBatchId); 
+      } catch (e) {
+        document.getElementById("syncStatus").textContent = "Synk misslyckades.";
+      } finally {
+        syncBtn.disabled = false;
+      }
+    } 
+
+    // ----- EVENTS ----- //
+    batchSelect.addEventListener("change", (e) => {
+      if (Object.keys(unsavedChanges).length > 0) {
+        if(!confirm("Du har osparade ändringar. Vill du byta vy ändå (ändringarna försvinner)?")) {
+          e.target.value = currentBatchId; 
+          return;
+        }
+      }
+      fetchTable(e.target.value);
+    });
+
+    searchInput.addEventListener("input", renderTable);
+    matchFilter.addEventListener("change", renderTable);
+    godkannFilterCheckboxes.forEach((cb) => cb.addEventListener("change", renderTable));
+    saveBatchBtn.addEventListener("click", saveBatch);
+    exportCsvBtn.addEventListener("click", exportCsv);
+    syncBtn.addEventListener("click", runSyncMetadata);
+
+    modalCloseBtn.addEventListener("click", () => modalBackdrop.classList.remove("show"));
+    modalBackdrop.addEventListener("click", (e) => { if (e.target === modalBackdrop) modalBackdrop.classList.remove("show"); });
+
+    tableBody.addEventListener("click", (e) => {
+      if (e.target.closest(".org-link")) {
+        e.stopPropagation();
+        return;
+      }
+
+      const btn = e.target.closest("button");
+      const tr = e.target.closest("tr[data-orgnr]");
+      if (!tr) return;
+      const orgnr = tr.getAttribute("data-orgnr");
+
+      if (btn) {
+        e.stopPropagation();
+        const action = btn.getAttribute("data-action");
+        if (!uiRowState[orgnr]) uiRowState[orgnr] = { mode: "idle", pendingDecision: null };
+
+        if (action === "approve") {
+          uiRowState[orgnr].mode = "choose"; uiRowState[orgnr].pendingDecision = "Godkänd";
+        } else if (action === "reject") {
+          uiRowState[orgnr].mode = "choose"; uiRowState[orgnr].pendingDecision = "Nekad";
+        } else if (action === "cancel") {
+          // Gå tillbaka till normalläget
+          uiRowState[orgnr].mode = "idle"; uiRowState[orgnr].pendingDecision = null;
+        } else if (action === "save-local") {
+          unsavedChanges[orgnr] = uiRowState[orgnr].pendingDecision;
+          uiRowState[orgnr].mode = "idle";
+        } else if (action === "change") {
+          // NYTT LÄGE: Användaren vill ändra -> visa Godkänn/Neka knapparna
+          uiRowState[orgnr].mode = "edit"; uiRowState[orgnr].pendingDecision = null;
+        } else if (action === "reset") {
+          unsavedChanges[orgnr] = "RESET"; uiRowState[orgnr].mode = "idle";
+        }
+        renderTable();
+        return;
+      }
+      openModalForRow(orgnr);
+    });
+
+    // INIT
+    fetchTable("1");
+  })();
+</script>
+</body>
+</html>
