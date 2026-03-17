@@ -486,7 +486,8 @@
 
     // ----- EXPORT CSV ----- //
     function buildCsv(rows) {
-      const header = ["ID", "Orgnr", "BV_Namn", "Entity_OrgName", "Entity_OrgDispName", "Juridisk_Form", "SNI_Koder", "Match_Status", "Beslut", "Kommentar"];
+      // Lade till "Bolagsstatus" i headern
+      const header = ["ID", "Orgnr", "BV_Namn", "Bolagsstatus", "Entity_OrgName", "Entity_OrgDispName", "Juridisk_Form", "SNI_Koder", "Match_Status", "Beslut", "Kommentar"];
       const lines = [header.join(";")];
 
       for (const row of rows) {
@@ -497,6 +498,7 @@
           row._id || "",
           row.orgnr || "",
           row.bvName || "",
+          row.bvStatus || "", // NYTT: Hämtar AVREGISTRERAD/KONKURS etc.
           row.entityOrgName || "",
           row.entityOrgDispName || "",
           row.formKod || "",
@@ -508,6 +510,7 @@
         
         const escaped = fields.map((v) => {
           const s = String(v || "");
+          // Hantera semikolon, citattecken och radbrytningar korrekt i Excel
           if (s.includes(";") || s.includes('"') || s.includes("\n")) return '"' + s.replace(/"/g, '""') + '"';
           return s;
         });
