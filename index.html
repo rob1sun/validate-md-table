@@ -111,6 +111,14 @@
         </div>
       </div>
 
+      <div class="filter-group">
+        <div class="filter-label">Kommentarer</div>
+        <label class="chip-check" style="background:#fefce8; border-color:#fde047; color:#854d0e;">
+          <input type="checkbox" id="commentFilter" />
+          <span>Endast med kommentar</span>
+        </label>
+      </div>
+
       <div class="filter-group" style="margin-left:auto;">
         <div class="filter-label">Status</div>
         <span id="rowCounter" style="font-size:0.75rem; font-weight: 600;">Visar 0 poster</span>
@@ -169,6 +177,7 @@
     const matchFilter = document.getElementById("matchFilter");
     const godkannFilterCheckboxes = Array.from(document.querySelectorAll(".godkann-filter"));
     const tableBody = document.getElementById("tableBody");
+    const commentFilter = document.getElementById("commentFilter");
     const rowCounter = document.getElementById("rowCounter");
     const syncBtn = document.getElementById("syncBtn");
     const exportCsvBtn = document.getElementById("exportCsvBtn");
@@ -216,15 +225,28 @@
       const search = (searchInput.value || "").toLowerCase();
       const matchVal = matchFilter.value;
       const selectedGodkann = new Set(godkannFilterCheckboxes.filter(cb => cb.checked).map(cb => cb.value));
+      const requireComment = commentFilter.checked; // NYTT: Kollar om boxen är ikryssad
 
       return currentRows.filter((row) => {
+        // 1. Sök-filter
         if (search) {
           const haystack = (row.orgnr + " " + row.bvName + " " + row.entityOrgName + " " + row.entityOrgDispName).toLowerCase();
           if (!haystack.includes(search)) return false;
         }
+        
+        // 2. Match-filter (OK / KOLLA)
         if (matchVal !== "ALL" && row.match !== matchVal) return false;
+        
+        // 3. Godkänn-filter
         const status = computeGodkannStatus(row);
         if (!selectedGodkann.has(status)) return false;
+
+        // 4. NYTT: Kommentar-filter
+        if (requireComment) {
+          const activeComment = unsavedComments[row.orgnr] !== undefined ? unsavedComments[row.orgnr] : (row.comment || "");
+          if (!activeComment) return false; // Dölj raden om den saknar kommentar
+        }
+
         return true;
       });
     }
@@ -639,6 +661,7 @@
     searchInput.addEventListener("input", renderTable);
     matchFilter.addEventListener("change", renderTable);
     godkannFilterCheckboxes.forEach((cb) => cb.addEventListener("change", renderTable));
+    commentFilter.addEventListener("change", renderTable);
     saveBatchBtn.addEventListener("click", saveBatch);
     exportCsvBtn.addEventListener("click", exportCsv);
     syncBtn.addEventListener("click", runSyncMetadata);
