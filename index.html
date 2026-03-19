@@ -508,8 +508,8 @@
 
     // ----- EXPORT CSV ----- //
     function buildCsv(rows) {
-      // Lade till "Bolagsstatus" i headern
-      const header = ["ID", "Orgnr", "BV_Namn", "Bolagsstatus", "Entity_OrgName", "Entity_OrgDispName", "Juridisk_Form", "SNI_Koder", "Match_Status", "Beslut", "Kommentar"];
+      // Lade till "EntityID" i headern
+      const header = ["ID", "Orgnr", "EntityID", "BV_Namn", "Bolagsstatus", "Entity_OrgName", "Entity_OrgDispName", "Juridisk_Form", "SNI_Koder", "Match_Status", "Beslut", "Kommentar"];
       const lines = [header.join(";")];
 
       for (const row of rows) {
@@ -519,8 +519,9 @@
         const fields = [
           row._id || "",
           row.orgnr || "",
+          row.entityId || "", // NYTT: Hämtar EntityID
           row.bvName || "",
-          row.bvStatus || "", // NYTT: Hämtar AVREGISTRERAD/KONKURS etc.
+          row.bvStatus || "", 
           row.entityOrgName || "",
           row.entityOrgDispName || "",
           row.formKod || "",
